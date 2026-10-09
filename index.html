@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Meu Controle Financeiro</title>
 <meta name="theme-color" content="#0f8b6d">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -84,6 +84,8 @@ select:disabled{opacity:.6}
 .dan{width:100%;background:none;border:1px solid var(--bad);color:var(--bad);border-radius:12px;padding:11px;margin-top:8px}
 .chk{display:flex;align-items:center;gap:8px;margin-top:10px}.chk input{width:auto}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:99px;z-index:30;font-size:13px}
+html,body,button,.row,.chips button,.nav{touch-action:manipulation}
+input,select,textarea{font-size:16px}
 </style></head><body>
 <div class="app" id="app"></div><div id="m1"></div><div id="m2"></div>
 <script>
@@ -162,6 +164,8 @@ function openMonths(y){const py=Math.max(2026,y||+k.slice(0,4));
  const mm=MN.map((n,i)=>{const key=py+'-'+pad(i+1),I=inv(key);return `<button class="mt ${key===k?'sel':''}" onclick="k='${key}';$('m2').innerHTML='';render()"><b>${n.slice(0,3)}</b><span class="badge ${I.st}">${LBL[I.st]}</span></button>`}).join('');
  $('m2').innerHTML=`<div class="ov top2" onclick="if(event.target===this)$('m2').innerHTML=''"><div class="sheet"><h3>Escolher mês <button class="ib" onclick="$('m2').innerHTML=''" aria-label="Fechar">✕</button></h3>
  <div class="yr"><button class="ib" ${py<=2026?'disabled':''} onclick="openMonths(${py-1})">‹</button><strong>${py}</strong><button class="ib" onclick="openMonths(${py+1})">›</button></div><div class="mg">${mm}</div></div></div>`}
+document.addEventListener('gesturestart',e=>e.preventDefault());
+document.addEventListener('touchmove',e=>{if(e.scale&&e.scale!==1)e.preventDefault()},{passive:false});
 function toggleTheme(){const r=document.documentElement,d=getComputedStyle(r).getPropertyValue('--bg').trim()==='#0e1512';r.dataset.theme=d?'light':'dark'}
 function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2600)}
 /* ---- Modelo mensal ---- */
