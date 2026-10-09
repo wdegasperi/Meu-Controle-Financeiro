@@ -1,14 +1,14 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Prumo</title>
+<title>Meu Controle Financeiro</title>
 <meta name="theme-color" content="#0f8b6d">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Prumo">
-<link rel="icon" type="image/svg+xml" href="app-icons/icon.svg">
-<link rel="icon" type="image/png" sizes="32x32" href="app-icons/favicon-32.png">
-<link rel="apple-touch-icon" href="app-icons/apple-touch-icon.png">
-<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Meu Controle">
+<link rel="icon" type="image/svg+xml" href="app-icons/icon.svg?v=2">
+<link rel="icon" type="image/png" sizes="32x32" href="app-icons/favicon-32.png?v=2">
+<link rel="apple-touch-icon" href="app-icons/apple-touch-icon.png?v=2">
+<link rel="manifest" href="manifest.webmanifest?v=2">
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 --bg:#f3f5f4;--card:#fff;--tx:#14201b;--mut:#6b7a73;--ln:#e2e8e5;--ac:#0f8b6d;--acs:#d9f2ea;--cc:#6d4fd6;--ccs:#ebe6fb;--bad:#d64545;--bads:#fbe4e4;--ok:#0f8b6d;--wr:#b36200;--wrs:#fdeccf;--bl:#1f6feb;--bls:#dbe9fd}
@@ -137,7 +137,7 @@ function draw(){const m=mes(k),[y,mo]=k.split('-').map(Number);
  <button class="add" onclick="openItem('mes',0,'${d}')">+ Adicionar</button><div class="tot"><span>Despesas</span><span>− ${R(sum(d))}</span></div>${inc(d)?`<div class="tot"><span>Receitas</span><span class="in">+ ${R(inc(d))}</span></div>`:''}</div>`};
  const s5=sec('d5','5º dia útil','Salário '+R(m.liq)),s20=sec('d20','Dia 20','Adiantamento '+R(m.adiant));
  const body=flt==='d5'?s5:flt==='d20'?s20:`<div class="dots">${[0,1].map(n=>`<i class="${pg===n?'on':''}" onclick="goPg(${n})"></i>`).join('')}</div><div class="car" id="car" onscroll="onCar(this)">${s5}${s20}</div>`;
- $('app').innerHTML=`<div class="top"><div class="logo" style="font-size:18px"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="32" height="32"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16a883"/><stop offset="1" stop-color="#0a5c48"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><circle cx="256" cy="98" r="20" fill="#fff"/><line x1="256" y1="118" x2="256" y2="232" stroke="#fff" stroke-width="12" stroke-linecap="round"/><path d="M204 236H308V270L256 428L204 270Z" fill="#fff" stroke="#fff" stroke-width="12" stroke-linejoin="round"/><path d="M204 272H308" stroke="#0b6e55" stroke-width="9" stroke-linecap="round" opacity=".55"/></svg><span>Pru<b>mo</b></span></div><div><button class="ib" onclick="toggleHide()" aria-label="Ocultar valores" title="Ocultar valores">${hide?EYE_OFF:EYE}</button> <button class="ib" onclick="toggleTheme()" aria-label="Tema" title="Tema">◐</button> <button class="ib" onclick="openCfg()" aria-label="Modelo mensal" title="Modelo mensal">⚙</button></div></div>
+ $('app').innerHTML=`<div class="top"><div class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="36" height="36"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16a883"/><stop offset="1" stop-color="#0a5c48"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><circle cx="256" cy="256" r="150" fill="#fff"/><circle cx="256" cy="256" r="118" fill="none" stroke="#8fe3c6" stroke-width="10"/><path d="M190 262L240 312L330 206" fill="none" stroke="#0f8b6d" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Meu Controle<br><b>Financeiro</b></span></div><div><button class="ib" onclick="toggleHide()" aria-label="Ocultar valores" title="Ocultar valores">${hide?EYE_OFF:EYE}</button> <button class="ib" onclick="toggleTheme()" aria-label="Tema" title="Tema">◐</button> <button class="ib" onclick="openCfg()" aria-label="Modelo mensal" title="Modelo mensal">⚙</button></div></div>
  <div class="nav"><button onclick="shift(-1)">‹</button><div onclick="openMonths()" style="cursor:pointer" aria-label="Escolher mês"><strong>${MN[mo-1]} ${y}</strong><span class="badge ${I.st}">${LB}</span></div><button onclick="shift(1)">›</button></div>
  <div class="chips">${[['d5','5º dia útil'],['d20','Dia 20'],['all','Total geral']].map(([v,l])=>`<button class="${flt===v?'on':''}" onclick="flt='${v}';render()">${l}</button>`).join('')}</div>
  <div class="kpis"><div class="kpi"><small>Total gasto</small><b>${R(gas)}</b></div><div class="kpi"><small>A receber</small><b>${R(rec)}</b>${ext?`<small class="sub">inclui ${R(ext)} de receitas</small>`:''}</div>
@@ -265,7 +265,7 @@ function flush(){const p={};if(dirty.cfg)p.cfg=cfg;
   if(String(e.message).includes('UNAUTHORIZED'))return login('Código inválido.');toast('Erro ao salvar: '+e.message)}).salvar(p)))}
 /* ---- Acesso e carga ---- */
 function login(msg){$('m1').innerHTML='';$('m2').innerHTML='';
- $('app').innerHTML=`<div class="box" style="margin-top:18vh"><h4>Prumo</h4><label>Código de acesso</label><input id="lg" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+ $('app').innerHTML=`<div class="box" style="margin-top:18vh"><h4>Meu Controle Financeiro</h4><label>Código de acesso</label><input id="lg" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
  <div class="hint" style="color:var(--bad)">${msg||''}</div><button class="pri" onclick="doLogin()">Entrar</button></div>`}
 function doLogin(){const v=$('lg').value.trim();if(!v)return;try{localStorage.setItem(CK,v)}catch(e){}load()}
 function load(){$('app').innerHTML='<div class="hint" style="text-align:center;margin-top:30vh">Carregando…</div>';
