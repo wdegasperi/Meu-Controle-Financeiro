@@ -111,15 +111,23 @@ k=openKey();
 function inv(key){const f=cfg.cartao.fech,v=cfg.cartao.venc,close=dateOf(key,f),prev=dateOf(addM(key,-1),f),due=v>f?dateOf(key,v):dateOf(addM(key,1),v);
  const st=today>due?'paga':today>=close?'fechada':today>=prev?'aberta':'futura';return{st,close,prev,due}}
 const fmtS=d=>d.slice(8,10)+'/'+d.slice(5,7);
+const INICIO='2026-10';
+const fm=n=>(Math.round((+n||0)*100)/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pn=el=>(+(el.value.replace(/\D/g,''))||0)/100;
+const pi=el=>parseInt(el.value.replace(/\D/g,''))||0;
+function mk(el){const d=el.value.replace(/\D/g,'').slice(0,12).replace(/^0+/,'');el.value=d?fm(+d/100):''}
+function dg(el,n){el.value=el.value.replace(/\D/g,'').slice(0,n)}
+function foc(el){setTimeout(()=>{try{el.setSelectionRange(0,el.value.length)}catch(e){el.select()}},0)}
+const MY='type="text" inputmode="numeric" autocomplete="off" placeholder="0,00" onfocus="foc(this)"',DG='type="text" inputmode="numeric" autocomplete="off" onfocus="foc(this)"';
 function mkSnap(){return {adiant:adOf(cfg),liq:cfg.base-adOf(cfg)-cfg.outros,fixos:cfg.fixos.map(f=>({...f,fixo:true}))}}
 function saldo(key){const m=mes(key),t=(i,r)=>m.itens.filter(x=>(x.tipo==='r')===r).reduce((a,x)=>a+x.valor,0);return m.liq+m.adiant+t(0,true)-t(0,false)}
-function carryItem(key){const pk=addM(key,-1);if(!cfg.inicio||pk<cfg.inicio)return [];const st=inv(pk).st;if(st!=='fechada'&&st!=='paga')return [];
+function carryItem(key){const pk=addM(key,-1);if(pk<INICIO)return [];const st=inv(pk).st;if(st!=='fechada'&&st!=='paga')return [];
  const L=Math.round(saldo(pk)*100)/100;return L>0?[{id:'c'+pk,nome:'Sobra de '+MN[+pk.slice(5)-1],valor:L,cartao:false,dia:'d5',data:dateOf(key,1),tipo:'r',auto:true}]:[]}
-function mes(key){const live=key>openKey();
+function mes(key){if(key<INICIO)return{adiant:0,liq:0,live:false,snap:{adiant:0,liq:0,fixos:[]},itens:[...(extras[key]||[])]};const live=key>openKey();
  const mk=mkSnap;
  if(!live&&!snaps[key]){snaps[key]=mk();if(key===openKey())dirty.snaps.add(key)}const sn=live?mk():snaps[key];
  return {adiant:sn.adiant,liq:sn.liq,live,snap:sn,itens:[...sn.fixos.map(f=>({...f,data:dateOf(key,f.dv)})),...(extras[key]||[]),...carryItem(key)]}}
-function shift(d){let[y,m]=k.split('-').map(Number);m+=d;if(m>12){m=1;y++}if(m<1){m=12;y--}k=y+'-'+String(m).padStart(2,'0');render()}
+function shift(d){let[y,m]=k.split('-').map(Number);m+=d;if(m>12){m=1;y++}if(m<1){m=12;y--}const nk=y+'-'+String(m).padStart(2,'0');if(nk<'2026-01')return;k=nk;render()}
 function row(i,mode){const dt=mode==='cfg'?'dia '+i.dv:fmtD(i.data),rc=i.tipo==='r';
  return `<div class="row ${rc?'rec':i.cartao?'cc':''}" onclick="${i.auto?"toast('Sobra calculada automaticamente')":"openItem('"+mode+"',"+i.id+")"}"><div class="ic">${rc?'＋':i.cartao?'💳':'💸'}</div>
 <div class="n"><div>${i.nome}${i.parc?` <span class="pc">${i.parc.p}/${i.parc.n}</span>`:''}</div><small class="${rc?'g':i.cartao?'c':''}">${rc?'Receita':i.cartao?'Cartão':'Pix/Débito'}${mode==='cfg'?'':i.auto?' · automática':i.fixo?' · fixo':' · avulso'} · ${dt}</small></div><b class="${rc?'in':''}">${rc?'+':'−'} ${R(i.valor)}</b></div>`}
@@ -138,7 +146,7 @@ function draw(){const m=mes(k),[y,mo]=k.split('-').map(Number);
  const s5=sec('d5','5º dia útil','Salário '+R(m.liq)),s20=sec('d20','Dia 20','Adiantamento '+R(m.adiant));
  const body=flt==='d5'?s5:flt==='d20'?s20:`<div class="dots">${[0,1].map(n=>`<i class="${pg===n?'on':''}" onclick="goPg(${n})"></i>`).join('')}</div><div class="car" id="car" onscroll="onCar(this)">${s5}${s20}</div>`;
  $('app').innerHTML=`<div class="top"><div class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="36" height="36"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16a883"/><stop offset="1" stop-color="#0a5c48"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><circle cx="256" cy="256" r="150" fill="#fff"/><circle cx="256" cy="256" r="118" fill="none" stroke="#8fe3c6" stroke-width="10"/><path d="M190 262L240 312L330 206" fill="none" stroke="#0f8b6d" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Meu Controle<br><b>Financeiro</b></span></div><div><button class="ib" onclick="toggleHide()" aria-label="Ocultar valores" title="Ocultar valores">${hide?EYE_OFF:EYE}</button> <button class="ib" onclick="toggleTheme()" aria-label="Tema" title="Tema">◐</button> <button class="ib" onclick="openCfg()" aria-label="Modelo mensal" title="Modelo mensal">⚙</button></div></div>
- <div class="nav"><button onclick="shift(-1)">‹</button><div onclick="openMonths()" style="cursor:pointer" aria-label="Escolher mês"><strong>${MN[mo-1]} ${y}</strong><span class="badge ${I.st}">${LB}</span></div><button onclick="shift(1)">›</button></div>
+ <div class="nav"><button onclick="shift(-1)" ${k<='2026-01'?'disabled style="opacity:.3"':''}>‹</button><div onclick="openMonths()" style="cursor:pointer" aria-label="Escolher mês"><strong>${MN[mo-1]} ${y}</strong><span class="badge ${I.st}">${LB}</span></div><button onclick="shift(1)">›</button></div>
  <div class="chips">${[['d5','5º dia útil'],['d20','Dia 20'],['all','Total geral']].map(([v,l])=>`<button class="${flt===v?'on':''}" onclick="flt='${v}';render()">${l}</button>`).join('')}</div>
  <div class="kpis"><div class="kpi"><small>Total gasto</small><b>${R(gas)}</b></div><div class="kpi"><small>A receber</small><b>${R(rec)}</b>${ext?`<small class="sub">inclui ${R(ext)} de receitas</small>`:''}</div>
  <div class="kpi lim ${lim<0?'neg':''}"><small>${lim<0?'Estourou o limite em':'Ainda posso gastar'}</small><b>${R(Math.abs(lim))}</b><div class="bar"><i style="width:${pct}%"></i></div></div></div>
@@ -159,24 +167,30 @@ function toast(t){const e=document.createElement('div');e.className='toast';e.te
 /* ---- Modelo mensal ---- */
 function openCfg(){draft=JSON.parse(JSON.stringify(cfg));drawCfg()}
 function drawCfg(){const d=draft,ad=adOf(d);$('m1').innerHTML=`<div class="ov" onclick="if(event.target===this)closeCfg()"><div class="sheet"><h3>Modelo mensal <button class="ib" onclick="closeCfg()">✕</button></h3>
-<div class="box"><h4>Salário</h4><label>Salário base</label><input id="s_base" type="number" step="0.01" value="${d.base}" oninput="sal()">
-<div class="g2"><div><label>Adiantamento (dia 20) %</label><input id="s_pct" type="number" value="${d.pct}" oninput="sal()"></div><div><label>Adiantamento R$</label><input id="s_ad" disabled value="${ad.toFixed(2)}"></div></div>
-<div class="g2"><div><label>Outros descontos</label><input id="s_out" type="number" step="0.01" value="${d.outros}" oninput="sal()"></div><div><label>Líquido 5º dia útil</label><input id="s_liq" type="number" step="0.01" value="${(d.base-ad-d.outros).toFixed(2)}" oninput="sal('liq')"></div></div>
+<div class="box"><h4>Salário</h4><label>Salário base</label><input id="s_base" ${MY} value="${fm(d.base)}" oninput="mk(this);sal()">
+<div class="g2"><div><label>Adiantamento (dia 20) %</label><input id="s_pct" ${DG} value="${d.pct}" oninput="dg(this,3);sal()"></div><div><label>Adiantamento R$</label><input id="s_ad" disabled value="${fm(ad)}"></div></div>
+<div class="g2"><div><label>Outros descontos</label><input id="s_out" ${MY} value="${fm(d.outros)}" oninput="mk(this);sal()"></div><div><label>Líquido 5º dia útil</label><input id="s_liq" ${MY} value="${fm(Math.max(0,d.base-ad-d.outros))}" oninput="mk(this);sal('liq')"></div></div>
 <div class="sum"><span>Total de descontos</span><b id="s_tot">${R(ad+d.outros)}</b></div>
 <div class="hint">Editar "Outros descontos" recalcula o líquido, e vice-versa. O adiantamento já entra no total de descontos.</div></div>
 <div class="box"><h4>Valores fixos (despesas e receitas)</h4>${d.fixos.map(i=>row(i,'cfg')).join('')}<button class="add" onclick="openItem('cfg',0,'d5')">+ Novo valor fixo</button></div>
-<div class="box"><h4>Cartão de crédito</h4><div class="g2"><div><label>Dia de fechamento</label><input id="c_f" type="number" value="${d.cartao.fech}"></div><div><label>Dia de vencimento</label><input id="c_v" type="number" value="${d.cartao.venc}"></div></div>
-<label>Limite</label><input id="c_l" type="number" value="${d.cartao.limite}"></div>
-<div class="box"><h4>Sobras acumuladas</h4><label>Acumular sobras a partir da fatura de</label><input id="c_i" type="month" value="${d.inicio||''}">
-<div class="hint">O que sobrar em "Ainda posso gastar" de cada fatura fechada vira uma receita automática na fatura seguinte. Deixe vazio para não acumular.</div></div>
+<div class="box"><h4>Cartão de crédito</h4><div class="g2"><div><label>Dia de fechamento</label><input id="c_f" ${DG} value="${d.cartao.fech}" oninput="dg(this,2)"></div><div><label>Dia de vencimento</label><input id="c_v" ${DG} value="${d.cartao.venc}" oninput="dg(this,2)"></div></div>
+<label>Limite</label><input id="c_l" ${MY} value="${fm(d.cartao.limite)}" oninput="mk(this)"></div>
 <label class="chk" style="color:var(--tx);font-size:14px;margin:0 0 12px"><input id="c_ap" type="checkbox" ${(d._ap===undefined?startedMonths().some(emptyM):d._ap)?'checked':''}><span>Ao salvar, escolher meses já iniciados para refazer com este modelo</span></label>
-<button class="pri" onclick="saveCfg()">Salvar</button></div></div>`}
-function sal(f){const b=+$('s_base').value||0,ad=b*(+$('s_pct').value||0)/100;
- if(f==='liq'){$('s_out').value=(b-ad-(+$('s_liq').value||0)).toFixed(2)}else{$('s_liq').value=(b-ad-(+$('s_out').value||0)).toFixed(2)}
- $('s_ad').value=ad.toFixed(2);$('s_tot').textContent=R(ad+(+$('s_out').value||0))}
-function readCfg(){draft.base=+$('s_base').value||0;draft.pct=+$('s_pct').value||0;draft.outros=+$('s_out').value||0;
- draft.inicio=$('c_i').value||'';draft._ap=$('c_ap').checked;draft.cartao={fech:+$('c_f').value,venc:+$('c_v').value,limite:+$('c_l').value}}
+<button class="pri" onclick="saveCfg()">Salvar</button><button class="dan" onclick="askReset()">Zerar o sistema…</button></div></div>`}
+function sal(f){const b=pn($('s_base')),ad=b*pi($('s_pct'))/100;
+ if(f==='liq'){$('s_out').value=fm(Math.max(0,b-ad-pn($('s_liq'))))}else{$('s_liq').value=fm(Math.max(0,b-ad-pn($('s_out'))))}
+ $('s_ad').value=fm(ad);$('s_tot').textContent=R(ad+pn($('s_out')))}
+function readCfg(){draft.base=pn($('s_base'));draft.pct=pi($('s_pct'));draft.outros=pn($('s_out'));draft._ap=$('c_ap').checked;
+ draft.cartao={fech:pi($('c_f')),venc:pi($('c_v')),limite:pn($('c_l'))}}
 function closeCfg(){$('m1').innerHTML='';draft=null}
+function askReset(){$('m2').innerHTML=`<div class="ov top2" onclick="if(event.target===this)$('m2').innerHTML=''"><div class="sheet"><h3>Zerar o sistema <button class="ib" onclick="$('m2').innerHTML=''" aria-label="Fechar">✕</button></h3>
+ <div class="hint" style="color:var(--bad);margin-bottom:8px"><b>Atenção!</b> Isso apaga o modelo mensal, a cópia de cada mês e todos os lançamentos. Não dá para desfazer.</div>
+ <label>Digite ZERAR para confirmar</label><input id="rs" autocomplete="off" autocapitalize="characters"><button class="dan" onclick="doReset()">Zerar tudo</button></div></div>`}
+function afterReset(){cfg=defCfg();Object.keys(snaps).forEach(x=>delete snaps[x]);Object.keys(extras).forEach(x=>delete extras[x]);
+ if(typeof dirty!=='undefined'){dirty.cfg=false;dirty.snaps.clear();dirty.ext.clear()}
+ $('m2').innerHTML='';closeCfg();k=openKey();mes(k);if(typeof flush==='function')flush();render();toast('Sistema zerado')}
+function doReset(){if($('rs').value.trim().toUpperCase()!=='ZERAR'){toast('Digite ZERAR para confirmar');return}
+ if(typeof google!=='undefined')google.script.run.withSuccessHandler(afterReset).withFailureHandler(e=>toast('Erro: '+e.message)).resetarTudo();else afterReset()}
 function saveCfg(){readCfg();const ap=draft._ap;delete draft._ap;cfg=draft;dirty.cfg=true;closeCfg();flush();toast('Salvo — vale para os próximos meses a iniciar');render();if(ap)openApply()}
 function emptyM(key){const sn=snaps[key];return !sn||(!sn.liq&&!sn.adiant&&!sn.fixos.length)}
 function startedMonths(){const ok=openKey(),ck=addM(ok,-1);return inv(ck).st==='fechada'?[ck,ok]:[ok]}
@@ -208,10 +222,10 @@ function openItem(mode,id,dia){let list,it,key=k;
  $('m2').innerHTML=`<div class="ov top2" onclick="if(event.target===this)$('m2').innerHTML=''"><div class="sheet"><h3>${id?'Editar':'Novo'} ${fx?'valor fixo':'lançamento'} <button class="ib" onclick="$('m2').innerHTML=''" aria-label="Fechar">✕</button></h3>
 <div class="seg"><button id="t_d" onclick="setT('d')">− Despesa</button><button id="t_r" onclick="setT('r')">＋ Receita</button></div><input type="hidden" id="i_t" value="${it.tipo==='r'?'r':'d'}">
  <label>Nome</label><input id="i_n" value="${it.nome}" placeholder="Ex.: Condomínio">
- <div class="g2"><div><label>${par?'Valor total':it.parc?'Valor da parcela':'Valor'}</label><input id="i_v" type="number" step="0.01" value="${it.valor}" oninput="upd()"></div>
- <div>${fx?`<label>Dia do vencimento</label><input id="i_dt" type="number" min="1" max="31" value="${it.dv||''}">`:`<label>${it.parc?'Data desta parcela':'Data'}</label><input id="i_dt" type="date" value="${it.data}" onchange="upd()">`}</div></div>
+ <div class="g2"><div><label>${par?'Valor total':it.parc?'Valor da parcela':'Valor'}</label><input id="i_v" ${MY} value="${it.valor===''?'':fm(it.valor)}" oninput="mk(this);upd()"></div>
+ <div>${fx?`<label>Dia do vencimento</label><input id="i_dt" ${DG} value="${it.dv||''}" oninput="dg(this,2)">`:`<label>${it.parc?'Data desta parcela':'Data'}</label><input id="i_dt" type="date" value="${it.data}" onchange="upd()">`}</div></div>
  <div class="chk" id="w_c"><input id="i_c" type="checkbox" ${it.cartao?'checked':''} onchange="upd()"><span>É do cartão de crédito</span></div>
- ${par?`<div class="chk" id="w_p"><input id="i_p" type="checkbox" onchange="upd()"><span>Parcelado em</span><input id="i_pn" type="number" min="2" max="48" value="2" style="width:80px" disabled oninput="upd()"><span>x</span></div>`:''}
+ ${par?`<div class="chk" id="w_p"><input id="i_p" type="checkbox" onchange="upd()"><span>Parcelado em</span><input id="i_pn" ${DG} value="2" style="width:80px" disabled oninput="dg(this,2);upd()"><span>x</span></div>`:''}
  <label id="l_d">Dia do mês</label><select id="i_d"><option value="d5">5º dia útil</option><option value="d20">Dia 20</option></select>
  <div class="hint" id="i_h"></div>${pc}<button class="pri" onclick="saveItem()">Salvar</button>${id?'<button class="dan" onclick="delItem()">Excluir</button>':''}</div></div>`;
  $('i_d').value=it.dia;setT($('i_t').value)}
@@ -220,9 +234,9 @@ function setT(t){$('i_t').value=t;const r=t==='r';$('t_d').classList.toggle('on'
  if(r)$('i_c').checked=false;$('i_n').placeholder=r?'Ex.: Aluguel recebido':'Ex.: Condomínio';$('l_d').textContent=r?'Entra no':'Dia do mês';upd()}
 function upd(){const c=$('i_c').checked;if(c)$('i_d').value='d5';$('i_d').disabled=c;let h=c?'Cartão sempre vai para o 5º dia útil. ':'';
  if(!ctx.fx){const dt=$('i_dt').value;if(dt)h+=($('i_t').value==='r'?'Cai em ':'Entra em ')+lbl(billKey(dt,c))+(c?' (fechamento dia '+cfg.cartao.fech+')':'')+'. '}
- const p=$('i_p');if(p){const n=+$('i_pn').value;$('i_pn').disabled=!p.checked;if(p.checked&&n>=2)h+=n+'x de '+R((+$('i_v').value||0)/n)+', nos meses seguintes.'}
+ const p=$('i_p');if(p){const n=+$('i_pn').value;$('i_pn').disabled=!p.checked;if(p.checked&&n>=2)h+=n+'x de '+R(pn($('i_v'))/n)+', nos meses seguintes.'}
  $('i_h').textContent=h}
-function saveItem(){const n=$('i_n').value.trim(),v=+$('i_v').value,dt=$('i_dt').value;if(!n||!v){toast('Preencha nome e valor');return}if(!dt){toast('Informe a data');return}
+function saveItem(){const n=$('i_n').value.trim(),v=pn($('i_v')),dt=$('i_dt').value;if(!n||!v){toast('Preencha nome e valor');return}if(!dt){toast('Informe a data');return}
  const TP=$('i_t').value,o={nome:n,valor:v,cartao:TP==='r'?false:$('i_c').checked,dia:$('i_d').value,tipo:TP==='r'?'r':undefined},it=ctx.it;
  if(ctx.fx){o.dv=Math.min(31,Math.max(1,+dt));if(ctx.id)Object.assign(it,o);else ctx.list.push({id:++uid,...o});if(ctx.mode==='mes')dirty.snaps.add(k)}
  else{o.data=dt;
