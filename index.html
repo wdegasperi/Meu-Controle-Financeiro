@@ -86,6 +86,10 @@ select:disabled{opacity:.6}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:99px;z-index:30;font-size:13px}
 html,body,button,.row,.chips button,.nav{touch-action:manipulation}
 input,select,textarea{font-size:16px}
+.sh .adj{color:var(--ac);cursor:pointer;font-weight:600}
+.car{overflow-y:hidden;overscroll-behavior-x:contain}.car>.sec{scroll-snap-stop:always}
+.car{display:block!important;overflow:hidden!important;scroll-snap-type:none!important;touch-action:pan-y;transition:height .2s;user-select:none;-webkit-user-select:none}
+.trk{display:flex;align-items:flex-start;transition:transform .25s ease}.trk>.sec{flex:0 0 100%;min-width:0;margin-top:0}
 </style></head><body>
 <div class="app" id="app"></div><div id="m1"></div><div id="m2"></div>
 <script>
@@ -125,10 +129,12 @@ function mkSnap(){return {adiant:adOf(cfg),liq:cfg.base-adOf(cfg)-cfg.outros,fix
 function saldo(key){const m=mes(key),t=(i,r)=>m.itens.filter(x=>(x.tipo==='r')===r).reduce((a,x)=>a+x.valor,0);return m.liq+m.adiant+t(0,true)-t(0,false)}
 function carryItem(key){const pk=addM(key,-1);if(pk<INICIO)return [];const st=inv(pk).st;if(st!=='fechada'&&st!=='paga')return [];
  const L=Math.round(saldo(pk)*100)/100;return L>0?[{id:'c'+pk,nome:'Sobra de '+MN[+pk.slice(5)-1],valor:L,cartao:false,dia:'d5',data:dateOf(key,1),tipo:'r',auto:true}]:[]}
-function mes(key){if(key<INICIO)return{adiant:0,liq:0,live:false,snap:{adiant:0,liq:0,fixos:[]},itens:[...(extras[key]||[])]};const live=key>openKey();
- const mk=mkSnap;
- if(!live&&!snaps[key]){snaps[key]=mk();if(key===openKey())dirty.snaps.add(key)}const sn=live?mk():snaps[key];
- return {adiant:sn.adiant,liq:sn.liq,live,snap:sn,itens:[...sn.fixos.map(f=>({...f,data:dateOf(key,f.dv)})),...(extras[key]||[]),...carryItem(key)]}}
+function markS(key){if(typeof dirty!=='undefined')dirty.snaps.add(key)}
+function mes(key){if(key<INICIO)return{adiant:0,liq:0,live:false,adj:false,snap:{adiant:0,liq:0,fixos:[]},itens:[...(extras[key]||[])]};const live=key>openKey();
+ let sg=snaps[key];
+ if(!live&&(!sg||!sg.fixos)){snaps[key]=Object.assign(mkSnap(),sg&&sg.adj?{adj:sg.adj}:{});sg=snaps[key];if(key===openKey())markS(key)}
+ const sn=live?mkSnap():sg,A=sg&&sg.adj;
+ return {adiant:A?A.adiant:sn.adiant,liq:A?A.liq:sn.liq,adj:!!A,live,snap:sn,itens:[...sn.fixos.map(f=>({...f,data:dateOf(key,f.dv)})),...(extras[key]||[]),...carryItem(key)]}}
 function shift(d){let[y,m]=k.split('-').map(Number);m+=d;if(m>12){m=1;y++}if(m<1){m=12;y--}const nk=y+'-'+String(m).padStart(2,'0');if(nk<'2026-01')return;k=nk;render()}
 function row(i,mode){const dt=mode==='cfg'?'dia '+i.dv:fmtD(i.data),rc=i.tipo==='r';
  return `<div class="row ${rc?'rec':i.cartao?'cc':''}" onclick="${i.auto?"toast('Sobra calculada automaticamente')":"openItem('"+mode+"',"+i.id+")"}"><div class="ic">${rc?'＋':i.cartao?'💳':'💸'}</div>
@@ -142,11 +148,11 @@ function draw(){const m=mes(k),[y,mo]=k.split('-').map(Number);
  const DT={paga:'venceu '+fmtS(I.due),fechada:(nd>0?'vence em '+nd+' dia'+(nd>1?'s':''):'vence hoje')+' · '+fmtS(I.due),aberta:'fecha '+fmtS(I.close)+' · vence '+fmtS(I.due),futura:'abre '+fmtS(I.prev)}[I.st];
  const ok=openKey(),ck=addM(ok,-1),lbm=x=>MN[+x.slice(5)-1];
  const sc=k===ok?(inv(ck).st==='fechada'?`<button class="sc" onclick="k='${ck}';render()">Fatura fechada de ${lbm(ck)} · vence ${fmtS(inv(ck).due)} ›</button>`:''):`<button class="sc" onclick="k='${ok}';render()">‹ Ir para a fatura aberta (${lbm(ok)})</button>`;
- const sec=(d,t,sub)=>{const its=m.itens.filter(i=>i.dia===d).sort((a,b)=>a.data>b.data?1:-1);return `<div class="sec"><div class="sh"><b>${t}</b><span>${sub}</span></div>
+ const sec=(d,t,sub)=>{const its=m.itens.filter(i=>i.dia===d).sort((a,b)=>a.data>b.data?1:-1);return `<div class="sec"><div class="sh"><b>${t}</b><span class="adj" onclick="openAdj()">${sub}${m.adj?' · ajustado':''} ✎</span></div>
  ${its.map(i=>row(i,'mes')).join('')||'<div class="row" style="cursor:default;color:var(--mut)">Nada lançado</div>'}
  <button class="add" onclick="openItem('mes',0,'${d}')">+ Adicionar</button><div class="tot"><span>Despesas</span><span>− ${R(sum(d))}</span></div>${inc(d)?`<div class="tot"><span>Receitas</span><span class="in">+ ${R(inc(d))}</span></div>`:''}</div>`};
  const s5=sec('d5','5º dia útil','Salário '+R(m.liq)),s20=sec('d20','Dia 20','Adiantamento '+R(m.adiant));
- const body=flt==='d5'?s5:flt==='d20'?s20:`<div class="dots">${[0,1].map(n=>`<i class="${pg===n?'on':''}" onclick="goPg(${n})"></i>`).join('')}</div><div class="car" id="car" onscroll="onCar(this)">${s5}${s20}</div>`;
+ const body=flt==='d5'?s5:flt==='d20'?s20:`<div class="dots">${[0,1].map(n=>`<i class="${pg===n?'on':''}" onclick="goPg(${n})"></i>`).join('')}</div><div class="car" id="car"><div class="trk" id="trk">${s5}${s20}</div></div>`;
  $('app').innerHTML=`<div class="top"><div class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="36" height="36"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16a883"/><stop offset="1" stop-color="#0a5c48"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><circle cx="256" cy="256" r="150" fill="#fff"/><circle cx="256" cy="256" r="118" fill="none" stroke="#8fe3c6" stroke-width="10"/><path d="M190 262L240 312L330 206" fill="none" stroke="#0f8b6d" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Meu Controle<br><b>Financeiro</b></span></div><div><button class="ib" onclick="toggleHide()" aria-label="Ocultar valores" title="Ocultar valores">${hide?EYE_OFF:EYE}</button> <button class="ib" onclick="toggleTheme()" aria-label="Tema" title="Tema">◐</button> <button class="ib" onclick="openCfg()" aria-label="Modelo mensal" title="Modelo mensal">⚙</button></div></div>
  <div class="nav"><button onclick="shift(-1)" ${k<='2026-01'?'disabled style="opacity:.3"':''}>‹</button><div onclick="openMonths()" style="cursor:pointer" aria-label="Escolher mês"><strong>${MN[mo-1]} ${y}</strong><span class="badge ${I.st}">${LB}</span></div><button onclick="shift(1)">›</button></div>
  <div class="chips">${[['d5','5º dia útil'],['d20','Dia 20'],['all','Total geral']].map(([v,l])=>`<button class="${flt===v?'on':''}" onclick="flt='${v}';render()">${l}</button>`).join('')}</div>
@@ -154,11 +160,24 @@ function draw(){const m=mes(k),[y,mo]=k.split('-').map(Number);
  <div class="kpi lim ${lim<0?'neg':''}"><small>${lim<0?'Estourou o limite em':'Ainda posso gastar'}</small><b>${R(Math.abs(lim))}</b><div class="bar"><i style="width:${pct}%"></i></div></div></div>
  ${body}
  <div class="leg"><span>💳 Cartão de crédito</span><span>💸 Pix / Débito</span><span><b class="in">＋</b> Receita</span></div>`;
- const c=$('car');if(c){c.scrollLeft=pg*c.clientWidth;fit()}}
-function fit(){const c=$('car');if(c&&c.children[pg])c.style.height=c.children[pg].offsetHeight+'px'}
+ const c=$('car');if(c){c.onpointerdown=carDown;const t=$('trk');t.style.transition='none';t.style.transform='translateX('+(-pg*100)+'%)';fit();requestAnimationFrame(()=>{t.style.transition='';fit()})}}
+function fit(){const c=$('car'),t=$('trk');if(c&&t&&t.children[pg])c.style.height=t.children[pg].offsetHeight+'px'}
 window.onresize=fit;
-function onCar(e){const n=Math.round(e.scrollLeft/e.clientWidth);if(n!==pg){pg=n;fit();document.querySelectorAll('.dots i').forEach((d,i)=>d.classList.toggle('on',i===n))}}
-function goPg(n){const c=$('car');c.scrollTo({left:n*c.clientWidth,behavior:'smooth'})}
+/* ---- Carrossel (arraste controlado, 2 listas) ---- */
+let st=null,movedX=false;
+function carDown(e){if(e.pointerType==='mouse'&&e.button!==0)return;st={x:e.clientX,y:e.clientY,dx:0,lock:null,t:Date.now()};const t=$('trk');if(t)t.style.transition='none'}
+function carMove(e){if(!st)return;const dx=e.clientX-st.x,dy=e.clientY-st.y;
+ if(!st.lock){if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy))st.lock='x';else if(Math.abs(dy)>8)st.lock='y'}
+ if(st.lock!=='x')return;st.dx=dx;const c=$('car'),t=$('trk');if(!c||!t)return;
+ const off=((pg===0&&dx>0)||(pg===1&&dx<0))?dx*0.2:dx;t.style.transform='translateX('+(-pg*c.clientWidth+off)+'px)'}
+function carUp(){if(!st)return;const s=st;st=null;const c=$('car'),t=$('trk');if(!c||!t)return;t.style.transition='';
+ let n=pg;if(s.lock==='x'){movedX=Math.abs(s.dx)>8;setTimeout(()=>movedX=false,80);const w=c.clientWidth,v=s.dx/((Date.now()-s.t)||1);
+  if(s.dx<-w*0.2||v<-0.4)n=1;else if(s.dx>w*0.2||v>0.4)n=0}
+ setPg(Math.max(0,Math.min(1,n)))}
+function setPg(n){pg=n;const t=$('trk');if(t)t.style.transform='translateX('+(-pg*100)+'%)';document.querySelectorAll('.dots i').forEach((d,i)=>d.classList.toggle('on',i===pg));fit()}
+const goPg=setPg;
+window.addEventListener('pointermove',carMove);window.addEventListener('pointerup',carUp);window.addEventListener('pointercancel',carUp);
+document.addEventListener('click',e=>{if(movedX){e.stopPropagation();e.preventDefault();movedX=false}},true);
 const LBL={paga:'Paga',fechada:'Fechada',aberta:'Aberta',futura:'Futura'};
 function openMonths(y){const py=Math.max(2026,y||+k.slice(0,4));
  const mm=MN.map((n,i)=>{const key=py+'-'+pad(i+1),I=inv(key);return `<button class="mt ${key===k?'sel':''}" onclick="k='${key}';$('m2').innerHTML='';render()"><b>${n.slice(0,3)}</b><span class="badge ${I.st}">${LBL[I.st]}</span></button>`}).join('');
@@ -166,6 +185,16 @@ function openMonths(y){const py=Math.max(2026,y||+k.slice(0,4));
  <div class="yr"><button class="ib" ${py<=2026?'disabled':''} onclick="openMonths(${py-1})">‹</button><strong>${py}</strong><button class="ib" onclick="openMonths(${py+1})">›</button></div><div class="mg">${mm}</div></div></div>`}
 document.addEventListener('gesturestart',e=>e.preventDefault());
 document.addEventListener('touchmove',e=>{if(e.scale&&e.scale!==1)e.preventDefault()},{passive:false});
+function openAdj(){if(k<INICIO){toast('Meses antes de Outubro/2026 ficam sem salário');return}
+ const m=mes(k),md=mkSnap();
+ $('m2').innerHTML=`<div class="ov top2" onclick="if(event.target===this)$('m2').innerHTML=''"><div class="sheet"><h3>Salário de ${lbl(k)} <button class="ib" onclick="$('m2').innerHTML=''" aria-label="Fechar">✕</button></h3>
+ <div class="hint" style="margin-bottom:6px">Informe o que você realmente recebeu (ou vai receber) neste mês. Vale só para ${lbl(k)}; o modelo mensal não muda.</div>
+ <label>5º dia útil (líquido)</label><input id="a_l" ${MY} value="${fm(m.liq)}" oninput="mk(this)">
+ <label>Dia 20 (adiantamento)</label><input id="a_a" ${MY} value="${fm(m.adiant)}" oninput="mk(this)">
+ <div class="hint">Modelo atual: 5º dia útil ${fm(md.liq)} · Dia 20 ${fm(md.adiant)}</div>
+ <button class="pri" onclick="saveAdj()">Salvar</button>${m.adj?'<button class="dan" onclick="clearAdj()">Voltar ao valor do modelo</button>':''}</div></div>`}
+function saveAdj(){const sg=snaps[k]||(snaps[k]={});sg.adj={liq:pn($('a_l')),adiant:pn($('a_a'))};markS(k);$('m2').innerHTML='';if(typeof flush==='function')flush();render();toast('Salário de '+lbl(k)+' ajustado')}
+function clearAdj(){if(snaps[k]){delete snaps[k].adj;markS(k)}$('m2').innerHTML='';if(typeof flush==='function')flush();render();toast('Voltou ao valor do modelo')}
 function toggleTheme(){const r=document.documentElement,d=getComputedStyle(r).getPropertyValue('--bg').trim()==='#0e1512';r.dataset.theme=d?'light':'dark'}
 function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2600)}
 /* ---- Modelo mensal ---- */
