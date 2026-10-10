@@ -90,9 +90,32 @@ input,select,textarea{font-size:16px}
 .car{overflow-y:hidden;overscroll-behavior-x:contain}.car>.sec{scroll-snap-stop:always}
 .car{display:block!important;overflow:hidden!important;scroll-snap-type:none!important;touch-action:pan-y;transition:height .2s;user-select:none;-webkit-user-select:none}
 .trk{display:flex;align-items:flex-start;transition:transform .25s ease}.trk>.sec{flex:0 0 100%;min-width:0;margin-top:0}
+.sp{position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0e1512;color:#fff;transition:opacity .45s ease;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.sp.out{opacity:0;pointer-events:none}
+.sp::before{content:"";position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,#2cc49c40,transparent 70%);animation:spfade 1.2s both}
+.sp svg{position:relative;width:min(46vw,170px);height:auto;overflow:visible}
+.sp-bg,.sp-coin{transform-box:fill-box;transform-origin:center}
+.sp-bg{animation:sppop .7s cubic-bezier(.2,.9,.3,1.25) both}.sp-coin{animation:sppop .6s .25s cubic-bezier(.2,.9,.3,1.25) both}
+.sp-ring{--l:742;stroke-dasharray:742;animation:spdr .8s .6s ease-out both}.sp-chk{--l:220;stroke-dasharray:220;animation:spdr .5s 1.3s ease-out both}
+.sp-nm{margin-top:22px;font-size:22px;font-weight:800;line-height:1.1;text-align:center;letter-spacing:-.3px;animation:spup .6s 1.6s both}
+.sp-nm span{display:block}.sp-nm span+span{color:#2cc49c}
+.sp-tg{margin-top:10px;font-size:12.5px;opacity:.7;text-align:center;padding:0 24px;animation:spup .6s 1.9s both}
+.sp-ld{position:absolute;bottom:11%;display:flex;flex-direction:column;align-items:center;gap:8px;font-size:11.5px;opacity:.75;animation:spup .5s 2s both}
+.sp-bar{width:120px;height:4px;border-radius:4px;background:#26342d;overflow:hidden}.sp-bar i{display:block;width:40%;height:100%;background:#2cc49c;border-radius:4px;animation:spsl 1.1s infinite ease-in-out}
+@keyframes sppop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes spdr{from{stroke-dashoffset:var(--l)}to{stroke-dashoffset:0}}
+@keyframes spup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes spfade{from{opacity:0}to{opacity:1}}
+@keyframes spsl{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
+@media (prefers-reduced-motion:reduce){.sp *,.sp::before{animation:none!important}}
 </style></head><body>
+<div id="sp" class="sp"><svg viewBox="0 0 512 512"><defs><linearGradient id="gsp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16a883"/><stop offset="1" stop-color="#0a5c48"/></linearGradient></defs><rect class="sp-bg" width="512" height="512" rx="112" fill="url(#gsp)"/><circle class="sp-coin" cx="256" cy="256" r="150" fill="#fff"/><circle class="sp-ring" cx="256" cy="256" r="118" fill="none" stroke="#8fe3c6" stroke-width="10" stroke-linecap="round" transform="rotate(-90 256 256)"/><path class="sp-chk" d="M190 262L240 312L330 206" fill="none" stroke="#0f8b6d" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div class="sp-nm"><span>Meu Controle</span><span>Financeiro</span></div><div class="sp-tg">Seu cartão e seu salário, em equilíbrio.</div><div class="sp-ld"><div class="sp-bar"><i></i></div>Carregando seus dados…</div></div>
 <div class="app" id="app"></div><div id="m1"></div><div id="m2"></div>
 <script>
+const SP0=Date.now();
+function hideSplash(){const e=document.getElementById('sp');if(!e||e.dataset.h)return;e.dataset.h=1;setTimeout(()=>{e.classList.add('out');setTimeout(()=>e.remove(),500)},Math.max(0,2500-(Date.now()-SP0)))}
+setTimeout(hideSplash,15000);
 const $=id=>document.getElementById(id);
 let M=false,hide=(()=>{try{return localStorage.getItem('hide')==='1'}catch(e){return false}})();
 const svg=d=>`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
@@ -311,15 +334,15 @@ function flush(){const p={};if(dirty.cfg)p.cfg=cfg;
  q=q.then(()=>new Promise(res=>google.script.run.withSuccessHandler(()=>res()).withFailureHandler(e=>{res();
   if(String(e.message).includes('UNAUTHORIZED'))return login('Código inválido.');toast('Erro ao salvar: '+e.message)}).salvar(p)))}
 /* ---- Acesso e carga ---- */
-function login(msg){$('m1').innerHTML='';$('m2').innerHTML='';
+function login(msg){hideSplash();$('m1').innerHTML='';$('m2').innerHTML='';
  $('app').innerHTML=`<div class="box" style="margin-top:18vh"><h4>Meu Controle Financeiro</h4><label>Código de acesso</label><input id="lg" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
  <div class="hint" style="color:var(--bad)">${msg||''}</div><button class="pri" onclick="doLogin()">Entrar</button></div>`}
 function doLogin(){const v=$('lg').value.trim();if(!v)return;try{localStorage.setItem(CK,v)}catch(e){}load()}
 function load(){$('app').innerHTML='<div class="hint" style="text-align:center;margin-top:30vh">Carregando…</div>';
- google.script.run.withSuccessHandler(d=>{cfg=Object.assign(defCfg(),d.cfg||{});snaps=d.snaps||{};extras=d.extras||{};k=openKey();mes(k);flush();render()})
+ google.script.run.withSuccessHandler(d=>{cfg=Object.assign(defCfg(),d.cfg||{});snaps=d.snaps||{};extras=d.extras||{};k=openKey();mes(k);flush();render();hideSplash()})
  .withFailureHandler(e=>{if(String(e.message).includes('UNAUTHORIZED')){try{localStorage.removeItem(CK)}catch(x){}return login('Código inválido.')}
-  $('app').innerHTML=`<div class="box" style="margin-top:18vh"><h4>Não foi possível carregar</h4><div class="hint">${e.message}</div><button class="pri" onclick="load()">Tentar de novo</button></div>`}).getAll()}
-function start(){if(API_URL.indexOf('script.google.com')<0){$('app').innerHTML='<div class="box" style="margin-top:18vh"><h4>Falta configurar</h4><div class="hint">Edite a constante API_URL no index.html com a URL do seu App da Web (termina em /exec).</div></div>';return}
+  hideSplash();$('app').innerHTML=`<div class="box" style="margin-top:18vh"><h4>Não foi possível carregar</h4><div class="hint">${e.message}</div><button class="pri" onclick="load()">Tentar de novo</button></div>`}).getAll()}
+function start(){if(API_URL.indexOf('script.google.com')<0){hideSplash();$('app').innerHTML='<div class="box" style="margin-top:18vh"><h4>Falta configurar</h4><div class="hint">Edite a constante API_URL no index.html com a URL do seu App da Web (termina em /exec).</div></div>';return}
  getCode()?load():login()}
 start();
 </script></body></html>
