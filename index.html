@@ -120,6 +120,10 @@ input,select,textarea{font-size:16px}
 .pr{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:3px 0}.pr.tt{border-top:1px solid var(--ln);margin-top:4px;padding-top:6px;font-weight:700}.pr .in{color:var(--ok)}.pr .bl{color:var(--bl)}
 .pop.l{left:0;right:auto}.kpi.cxk2{cursor:pointer;border-left:3px solid var(--bl)}.kpi.cxk2 b{color:var(--bl)}
 .pr .pu{color:var(--cc)}
+.pop{width:max-content;min-width:240px;max-width:calc(100vw - 28px)}.pr span{white-space:nowrap}.toast{z-index:60}
+.mw{position:relative}.mw input{padding-right:46px}.cb{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;background:transparent;color:var(--mut);display:flex;align-items:center;justify-content:center;padding:0;margin:0;border-radius:8px}
+.ov.top3{z-index:40}.cd{background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:10px 14px;text-align:right;min-height:78px;overflow:hidden}.ce{font-size:26px;font-weight:700;word-break:break-all;min-height:34px}.cr{font-size:14px;color:var(--mut);min-height:20px}
+.kp{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 4px}.kp button{margin:0;height:52px;border-radius:12px;border:1px solid var(--ln);background:var(--card);color:var(--tx);font-size:20px;font-weight:600}.kp .op{color:var(--ac)}.kp .w2{grid-column:span 2}
 </style></head><body>
 <div id="sp" class="sp"><svg viewBox="0 0 512 512"><defs><linearGradient id="gsp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16a883"/><stop offset="1" stop-color="#0a5c48"/></linearGradient></defs><rect class="sp-bg" width="512" height="512" rx="112" fill="url(#gsp)"/><circle class="sp-coin" cx="256" cy="256" r="150" fill="#fff"/><circle class="sp-ring" cx="256" cy="256" r="118" fill="none" stroke="#8fe3c6" stroke-width="10" stroke-linecap="round" transform="rotate(-90 256 256)"/><path class="sp-chk" d="M190 262L240 312L330 206" fill="none" stroke="#0f8b6d" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <div class="sp-nm"><span>Meu Controle</span><span>Financeiro</span></div><div class="sp-tg">Seu cartão e seu salário, em equilíbrio.</div><div class="sp-ld"><div class="sp-bar"><i></i></div>Carregando seus dados…</div></div>
@@ -173,7 +177,7 @@ function mes(key){if(key<INICIO){const A0=snaps[key]&&snaps[key].adj;return{adia
  let sg=snaps[key];
  if(!live&&(!sg||!sg.fixos)){snaps[key]=Object.assign(mkSnap(),sg&&sg.adj?{adj:sg.adj}:{});sg=snaps[key];if(key===openKey())markS(key)}
  const sn=live?mkSnap():sg,A=sg&&sg.adj;
- return {adiant:A?A.adiant:sn.adiant,liq:A?A.liq:sn.liq,adj:!!A,live,snap:sn,itens:[...sn.fixos.map(f=>({...f,data:dateOf(key,f.dv)})),...(extras[key]||[]),...carryItem(key)]}}
+ return {adiant:A?A.adiant:sn.adiant,liq:A?A.liq:sn.liq,adj:!!A,live,snap:sn,itens:[...sn.fixos.map(f=>({...f,data:f.cartao&&f.dv>=cfg.cartao.fech?dateOf(addM(key,-1),f.dv):dateOf(key,f.dv)})),...(extras[key]||[]),...carryItem(key)]}}
 function shift(d){let[y,m]=k.split('-').map(Number);m+=d;if(m>12){m=1;y++}if(m<1){m=12;y--}const nk=y+'-'+String(m).padStart(2,'0');if(nk<'2026-01')return;k=nk;render()}
 function row(i,mode){const dt=mode==='cfg'?'dia '+i.dv:fmtD(i.data),rc=i.tipo==='r';
  return `<div class="row ${rc?'rec':i.cartao?'cc':''}" onclick="${i.auto?"toast('Sobra calculada automaticamente')":"openItem('"+mode+"',"+i.id+")"}"><div class="ic">${rc?'＋':i.cartao?'💳':'💸'}</div>
@@ -181,7 +185,7 @@ function row(i,mode){const dt=mode==='cfg'?'dia '+i.dv:fmtD(i.data),rc=i.tipo===
 function render(){M=hide;try{draw()}finally{M=false}}
 function draw(){const m=mes(k),[y,mo]=k.split('-').map(Number);
  const sum=d=>m.itens.filter(i=>i.tipo!=='r'&&(!d||i.dia===d)).reduce((a,i)=>a+i.valor,0),inc=d=>m.itens.filter(i=>i.tipo==='r'&&(!d||i.dia===d)).reduce((a,i)=>a+i.valor,0);
- const pas=passou(k,flt),base=flt==='d5'?m.liq:flt==='d20'?m.adiant:m.liq+m.adiant,ext=flt==='all'?inc():inc(flt),cxm=cxNet(k,flt),au=m.itens.filter(i=>i.auto&&(flt==='all'||i.dia===flt)).reduce((a,i)=>a+i.valor,0),dd=m.itens.filter(i=>i.tipo!=='r'&&(flt==='all'||i.dia===flt)),fatG=dd.filter(i=>i.cartao).reduce((a,i)=>a+i.valor,0),fatU=dd.filter(i=>i.cartao&&i.data<=today).reduce((a,i)=>a+i.valor,0),avu=dd.filter(i=>!i.cartao).reduce((a,i)=>a+i.valor,0),rec=base+ext-cxm,gas=flt==='all'?sum():sum(flt),lim=rec-gas,pct=rec>0?Math.min(100,gas/rec*100):100;
+ const pas=passou(k,flt),base=flt==='d5'?m.liq:flt==='d20'?m.adiant:m.liq+m.adiant,ext=flt==='all'?inc():inc(flt),cxm=cxNet(k,flt),au=m.itens.filter(i=>i.auto&&(flt==='all'||i.dia===flt)).reduce((a,i)=>a+i.valor,0),dd=m.itens.filter(i=>i.tipo!=='r'&&(flt==='all'||i.dia===flt)),fatG=dd.filter(i=>i.cartao).reduce((a,i)=>a+i.valor,0),fatU=dd.filter(i=>i.cartao&&(i.parc||i.data<=today)).reduce((a,i)=>a+i.valor,0),avu=dd.filter(i=>!i.cartao).reduce((a,i)=>a+i.valor,0),rec=base+ext-cxm,gas=flt==='all'?sum():sum(flt),lim=rec-gas,pct=rec>0?Math.min(100,gas/rec*100):100;
  const I=inv(k),fc=I.st==='fechada'||I.st==='paga',nd=Math.round((new Date(I.due)-new Date(today))/864e5);
  const LB={paga:'Paga',fechada:'Fechada',aberta:'Aberta',futura:'Futura'}[I.st];
  const DT={paga:'venceu '+fmtS(I.due),fechada:(nd>0?'vence em '+nd+' dia'+(nd>1?'s':''):'vence hoje')+' · '+fmtS(I.due),aberta:'fecha '+fmtS(I.close)+' · vence '+fmtS(I.due),futura:'abre '+fmtS(I.prev)}[I.st];
@@ -195,7 +199,7 @@ function draw(){const m=mes(k),[y,mo]=k.split('-').map(Number);
  $('app').innerHTML=`<div class="top"><div class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="36" height="36"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16a883"/><stop offset="1" stop-color="#0a5c48"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><circle cx="256" cy="256" r="150" fill="#fff"/><circle cx="256" cy="256" r="118" fill="none" stroke="#8fe3c6" stroke-width="10"/><path d="M190 262L240 312L330 206" fill="none" stroke="#0f8b6d" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Meu Controle<br><b>Financeiro</b></span></div><div><button class="ib" onclick="toggleHide()" aria-label="Ocultar valores" title="Ocultar valores">${hide?EYE_OFF:EYE}</button> <button class="ib" onclick="toggleTheme()" aria-label="Tema" title="Tema">◐</button> <button class="ib" onclick="openCfg()" aria-label="Modelo mensal" title="Modelo mensal">⚙</button></div></div>
  <div class="nav"><button onclick="shift(-1)" ${k<='2026-01'?'disabled style="opacity:.3"':''}>‹</button><div onclick="openMonths()" style="cursor:pointer" aria-label="Escolher mês"><strong>${MN[mo-1]} ${y}</strong><span class="badge ${I.st}">${LB}</span></div><button onclick="shift(1)">›</button></div>
  <div class="chips">${[['d5','5º dia útil'],['d20','Dia 20'],['all','Total geral']].map(([v,l])=>`<button class="${flt===v?'on':''}" onclick="flt='${v}';render()">${l}</button>`).join('')}</div>
- <div class="kpis"><div class="kpi rc" onclick="togPop(event)"><small>Total gasto ⓘ</small><b>${R(gas)}</b><div class="pop l" onclick="event.stopPropagation()"><div class="pr"><span>Fatura proporcional</span><span class="pu">− ${R(fatU)}</span></div><div class="pr"><span>Fatura geral</span><span class="pu">− ${R(fatG)}</span></div><div class="pr"><span>Despesas</span><span>− ${R(avu)}</span></div><div class="pr tt"><span>Total</span><span>− ${R(gas)}</span></div></div></div><div class="kpi rc" onclick="togPop(event)"><small>${pas?'Recebido':'A receber'}${(ext||cxm)?' ⓘ':''}</small><b>${R(rec)}</b>${(ext||cxm)?`<div class="pop" onclick="event.stopPropagation()"><div class="pr"><span>Salário</span><span>${R(base)}</span></div>${ext-au?`<div class="pr"><span>Receitas</span><span class="in">+ ${R(ext-au)}</span></div>`:''}${au?`<div class="pr"><span>Sobra do mês anterior</span><span class="in">+ ${R(au)}</span></div>`:''}${cxm?`<div class="pr"><span>Caixinha</span><span class="bl">${cxm>0?'−':'+'} ${R(Math.abs(cxm))}</span></div>`:''}<div class="pr tt"><span>Total</span><span>${R(rec)}</span></div></div>`:''}</div><div class="kpi cxk2" onclick="openCx()"><small>Caixinha</small><b>${R(cxTotal('9999-12'))}</b></div>
+ <div class="kpis"><div class="kpi${flt==='d20'?'':' rc'}"${flt==='d20'?'':' onclick="togPop(event)"'}><small>Total gasto${flt==='d20'?'':' ⓘ'}</small><b>${R(gas)}</b>${flt==='d20'?'':`<div class="pop l" onclick="event.stopPropagation()"><div class="pr"><span>Fatura proporcional</span><span class="pu">− ${R(fatU)}</span></div><div class="pr"><span>Fatura geral</span><span class="pu">− ${R(fatG)}</span></div><div class="pr"><span>Despesas</span><span>− ${R(avu)}</span></div><div class="pr tt"><span>Total</span><span>− ${R(gas)}</span></div></div>`}</div><div class="kpi rc" onclick="togPop(event)"><small>${pas?'Recebido':'A receber'}${(ext||cxm)?' ⓘ':''}</small><b>${R(rec)}</b>${(ext||cxm)?`<div class="pop" onclick="event.stopPropagation()"><div class="pr"><span>Salário</span><span>${R(base)}</span></div>${ext-au?`<div class="pr"><span>Receitas</span><span class="in">+ ${R(ext-au)}</span></div>`:''}${au?`<div class="pr"><span>Sobra do mês anterior</span><span class="in">+ ${R(au)}</span></div>`:''}${cxm?`<div class="pr"><span>Caixinha</span><span class="bl">${cxm>0?'−':'+'} ${R(Math.abs(cxm))}</span></div>`:''}<div class="pr tt"><span>Total</span><span>${R(rec)}</span></div></div>`:''}</div><div class="kpi cxk2" onclick="openCx()"><small>Caixinha</small><b>${R(cxTotal('9999-12'))}</b></div>
  <div class="kpi lim ${lim<0?'neg':''}"><small>${lim<0?(fc?'Faltou':'Estourou o limite em'):(fc?'Sobra':'Ainda posso gastar')}</small><b>${R(Math.abs(lim))}</b><div class="bar"><i style="width:${pct}%"></i></div></div></div>
  ${body}
  <div class="leg"><span>💳 Cartão de crédito</span><span>💸 Pix / Débito</span><span><b class="in">＋</b> Receita</span></div>`;
@@ -238,6 +242,34 @@ const kfmt=n=>n>=1e6?(n/1e6).toFixed(1).replace('.',',')+' mi':n>=1000?(n/1000).
 function cxBadge(){const t=cxTotal('9999-12');return t>0?'<span class="csel">'+(M?'•••':kfmt(t))+'</span>':''}
 function togPop(e){e.stopPropagation();const p=e.currentTarget.querySelector('.pop');if(!p)return;const on=p.classList.contains('on');document.querySelectorAll('.pop.on').forEach(x=>x.classList.remove('on'));if(!on)p.classList.add('on')}
 document.addEventListener('click',()=>document.querySelectorAll('.pop.on').forEach(x=>x.classList.remove('on')));
+/* ---- Calculadora nos campos de valor ---- */
+const CALC=svg('<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/>');
+let cEl=null,cEx='';
+function calcEval(e){const t=(e.replace(/,/g,'.').match(/\d*\.?\d+|[+−×÷]/g)||[]);if(!t.length)return null;if(t[0]==='−'&&t.length>1){t.shift();t[0]='-'+t[0]}
+ if(t.length%2===0)t.pop();const nums=[+t[0]],ops=[];if(isNaN(nums[0]))return null;
+ for(let i=1;i<t.length;i+=2){const op=t[i],n=+t[i+1];if(isNaN(n)||'+−×÷'.indexOf(op)<0)return null;
+  if(op==='×')nums[nums.length-1]*=n;else if(op==='÷'){if(n===0)return null;nums[nums.length-1]/=n}else{ops.push(op);nums.push(n)}}
+ let r=nums[0];ops.forEach((o,i)=>{r=o==='+'?r+nums[i+1]:r-nums[i+1]});return Math.round(r*100)/100}
+function openCalc(el){cEl=el;const v=pn(el);cEx=v?String(v).replace('.',','):'';calcDraw()}
+function calcClose(){const m=document.getElementById('m3');if(m)m.innerHTML=''}
+function calcDraw(){let m=document.getElementById('m3');if(!m){m=document.createElement('div');m.id='m3';document.body.appendChild(m)}
+ const r=calcEval(cEx),K=(l,c)=>`<button type="button" class="${c||''}" onclick="calcKey('${l}')">${l}</button>`;
+ m.innerHTML=`<div class="ov top3" onclick="if(event.target===this)calcClose()"><div class="sheet"><h3>Calculadora <button class="ib" onclick="calcClose()" aria-label="Fechar">✕</button></h3>
+ <div class="cd"><div class="ce">${cEx||'0'}</div><div class="cr">${r===null||!/[+−×÷]/.test(cEx.replace(/^−/,''))?'':'= '+fm(r)}</div></div>
+ <div class="kp">${K('C','op')}${K('⌫','op')}${K('÷','op')}${K('×','op')}${K('7')}${K('8')}${K('9')}${K('−','op')}${K('4')}${K('5')}${K('6')}${K('+','op')}${K('1')}${K('2')}${K('3')}${K(',')}${K('0','w2')}${K('=','w2 op')}</div>
+ <button class="pri" onclick="calcUse()">Usar valor</button></div></div>`}
+function calcKey(k){const ops='+−×÷',last=cEx.slice(-1);
+ if(k==='C')cEx='';else if(k==='⌫')cEx=cEx.slice(0,-1);
+ else if(k==='='){const r=calcEval(cEx);if(r!==null)cEx=String(r).replace('.',',')}
+ else if(ops.indexOf(k)>=0){if(!cEx&&k!=='−')return;if(ops.indexOf(last)>=0)cEx=cEx.slice(0,-1);cEx+=k}
+ else if(k===','){const seg=cEx.split(/[+−×÷]/).pop();if(seg.indexOf(',')<0)cEx+=seg?',':'0,'}
+ else if(cEx.length<30)cEx+=k;
+ calcDraw()}
+function calcUse(){const r=calcEval(cEx);if(r===null||r<0){toast('Valor inválido');return}cEl.value=fm(r);cEl.dispatchEvent(new Event('input',{bubbles:true}));calcClose()}
+function addCalcs(){document.querySelectorAll('input[inputmode="numeric"][placeholder="0,00"]').forEach(el=>{if(el.dataset.calc)return;el.dataset.calc=1;
+ const w=document.createElement('div');w.className='mw';el.parentNode.insertBefore(w,el);w.appendChild(el);
+ const b=document.createElement('button');b.type='button';b.className='cb';b.setAttribute('aria-label','Calculadora');b.innerHTML=CALC;b.onclick=()=>openCalc(el);w.appendChild(b)})}
+if(typeof MutationObserver!=='undefined')new MutationObserver(addCalcs).observe(document.body,{childList:true,subtree:true});
 /* ---- Caixinha / investido (informativo) ---- */
 let cx=typeof dirty==='undefined'?[{id:1,data:cur+'-02',tipo:'i',valor:5000,nome:'Reserva de emergência',dia:'d5'},{id:2,data:addM(cur,1)+'-10',tipo:'g',valor:300,nome:'Aporte mensal',dia:'d5'}]:[];
 let ctxC=null;
