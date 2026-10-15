@@ -125,7 +125,7 @@ input,select,textarea{font-size:16px}
 <script>
 const SP0=Date.now();
 function hideSplash(){const e=document.getElementById('sp');if(!e||e.dataset.h)return;e.dataset.h=1;setTimeout(()=>{e.classList.add('out');setTimeout(()=>e.remove(),500)},Math.max(0,2500-(Date.now()-SP0)))}
-setTimeout(hideSplash,15000);
+setTimeout(hideSplash,10000);
 const $=id=>document.getElementById(id);
 let M=false,hide=(()=>{try{return localStorage.getItem('hide')==='1'}catch(e){return false}})();
 const svg=d=>`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
@@ -368,15 +368,16 @@ function delItem(){const it=ctx.it;
  $('m2').innerHTML='';flush();ctx.mode==='cfg'?drawCfg():render()}
 /* ---- Ponte: simula google.script.run via fetch para o Apps Script ---- */
 const API_URL='https://script.google.com/macros/s/AKfycbyO5xXoXN6CXmyURsiklkYr8BtWNiqqk1hfUyD_MkKn51BROAImja_0-CpH1M95f6xm/exec';
-const CK='prumo_code
 const CK='prumo_code';
 const getCode=()=>{try{return localStorage.getItem(CK)||''}catch(e){return ''}};
-function post(fn,args){return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args,code:getCode()})})
- .then(r=>r.json()).then(r=>{if(!r.ok)throw new Error(r.error||'Erro desconhecido');return r.data})}
+function post(fn,args){const ac=new AbortController(),to=setTimeout(()=>ac.abort(),25000);
+ return fetch(API_URL,{method:'POST',signal:ac.signal,headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args,code:getCode()})})
+ .then(r=>r.json()).then(r=>{if(!r.ok)throw new Error(r.error||'Erro desconhecido');return r.data})
+ .catch(e=>{throw(e&&e.name==='AbortError')?new Error('Tempo esgotado ao falar com o servidor. Verifique a conexão.'):e}).finally(()=>clearTimeout(to))}
 function runner(ok,fail){return new Proxy({},{get(_,p){
  if(p==='withSuccessHandler')return f=>runner(f,fail);
  if(p==='withFailureHandler')return f=>runner(ok,f);
- return(...a)=>{post(p,a).then(r=>ok&&ok(r),e=>fail&&fail(e))}}})}
+ return(...a)=>{post(p,a).then(r=>{try{ok&&ok(r)}catch(err){fail&&fail(err)}},e=>fail&&fail(e))}}})}
 window.google={script:{run:runner(null,null)}};
 /* ---- Persistência ---- */
 let q=Promise.resolve();
@@ -388,6 +389,9 @@ function flush(){const p={};if(dirty.cfg)p.cfg=cfg;if(dirty.cx)p.cx=cx;
  q=q.then(()=>new Promise(res=>google.script.run.withSuccessHandler(()=>res()).withFailureHandler(e=>{res();
   if(String(e.message).includes('UNAUTHORIZED'))return login('Código inválido.');toast('Erro ao salvar: '+e.message)}).salvar(p)))}
 /* ---- Acesso e carga ---- */
+function fatal(msg){hideSplash();const a=document.getElementById('app');if(a&&!a.querySelector('.kpis')){a.innerHTML='<div class="box" style="margin-top:18vh"><h4>Algo deu errado</h4><div class="hint" style="word-break:break-word">'+String(msg).replace(/</g,'&lt;')+'</div><button class="pri" onclick="location.reload()">Recarregar</button></div>'}}
+window.addEventListener('error',e=>fatal(e.message||'Erro inesperado'));
+window.addEventListener('unhandledrejection',e=>fatal((e.reason&&e.reason.message)||'Erro inesperado'));
 function login(msg){hideSplash();$('m1').innerHTML='';$('m2').innerHTML='';
  $('app').innerHTML=`<div class="box" style="margin-top:18vh"><h4>Meu Controle Financeiro</h4><label>Código de acesso</label><input id="lg" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
  <div class="hint" style="color:var(--bad)">${msg||''}</div><button class="pri" onclick="doLogin()">Entrar</button></div>`}
