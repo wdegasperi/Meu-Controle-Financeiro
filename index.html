@@ -211,8 +211,8 @@ function draw(){const m=mes(k),[y,mo]=k.split('-').map(Number);
  const d5p=today>=quintoUtil(k),d20p=today>=k+'-20',
   salP=flt==='d5'?(d5p?m.liq:0):flt==='d20'?(d20p?m.adiant:0):(d5p?m.liq:0)+(d20p?m.adiant:0),
   cxP=cx.filter(x=>x.tipo!=='i'&&cxMonth(x.data)===k&&x.data<=today&&(flt==='all'||x.dia===flt)).reduce((a,x)=>a+(x.tipo==='g'?x.valor:-x.valor),0),
-  recP=salP+rp+au+xfv-cxP,gasP=fatU+dpP,limP=recP-gasP,
-  LV=lm?limP:lim,LP=lm?(recP>0?Math.min(100,gasP/recP*100):(gasP>0?100:0)):pct,
+  gasP=fatU+dpP,limP=rec-gasP,
+  LV=lm?limP:lim,LP=lm?(rec>0?Math.min(100,gasP/rec*100):(gasP>0?100:0)):pct,
   LL=LV<0?(fc?'Faltou':'Estourou o limite em'):(sbr?'Sobrou':fc?'Sobra':'Ainda posso gastar');
  const LB={paga:'Paga',fechada:'Fechada',aberta:'Aberta',futura:'Futura'}[I.st];
  const DT={paga:'venceu '+fmtS(I.due),fechada:(nd>0?'vence em '+nd+' dia'+(nd>1?'s':''):'vence hoje')+' · '+fmtS(I.due),aberta:'fecha '+fmtS(I.close)+' · vence '+fmtS(I.due),futura:'abre '+fmtS(I.prev)}[I.st];
