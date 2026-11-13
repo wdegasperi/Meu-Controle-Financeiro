@@ -170,7 +170,10 @@ img.nu{object-fit:cover;display:block}.ic img.nu{width:24px;height:24px;border-r
  .tots{display:flex;background:var(--bg)}.tots .tot{flex:1 1 0;min-width:0}.tots .tot+.tot{border-top:0;border-left:1px solid var(--ln)}.tot{padding:12px 20px}
  .ov{align-items:center}.sheet{border-radius:20px;max-width:480px;max-height:88vh;padding:20px 22px}
 }
-</style></head><body>
+@media(min-width:900px){.app>.box,.app>.hint{grid-column:1/-1;grid-row:2;justify-self:center;width:100%;max-width:400px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+</head><body>
 <div id="sp" class="sp"><svg viewBox="0 0 512 512"><defs><linearGradient id="gsp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16a883"/><stop offset="1" stop-color="#0a5c48"/></linearGradient></defs><rect class="sp-bg" width="512" height="512" rx="112" fill="url(#gsp)"/><circle class="sp-coin" cx="256" cy="256" r="150" fill="#fff"/><circle class="sp-ring" cx="256" cy="256" r="118" fill="none" stroke="#8fe3c6" stroke-width="10" stroke-linecap="round" transform="rotate(-90 256 256)"/><path class="sp-chk" d="M190 262L240 312L330 206" fill="none" stroke="#0f8b6d" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/></svg>
 <div class="sp-nm"><span>Meu Controle</span><span>Financeiro</span></div><div class="sp-tg">Seu cartão e seu salário, em equilíbrio.</div><div class="sp-ld"><div class="sp-bar"><i></i></div>Carregando seus dados…</div></div>
 <div class="app" id="app"></div><div id="m1"></div><div id="m2"></div>
@@ -401,7 +404,7 @@ function drawCfg(){const d=draft,ad=adOf(d);$('m1').innerHTML=`<div class="ov" o
 <div class="box"><h4>Cartão de crédito</h4><div class="g2"><div><label>Dia de fechamento</label><input id="c_f" ${DG} value="${d.cartao.fech}" oninput="dg(this,2)"></div><div><label>Dia de vencimento</label><input id="c_v" ${DG} value="${d.cartao.venc}" oninput="dg(this,2)"></div></div>
 <label>Limite</label><input id="c_l" ${MY} value="${fm(d.cartao.limite)}" oninput="mk(this)"></div>
 <label class="chk" style="color:var(--tx);font-size:14px;margin:0 0 12px"><input id="c_ap" type="checkbox" ${(d._ap===undefined?startedMonths().some(emptyM):d._ap)?'checked':''}><span>Ao salvar, escolher meses já iniciados para refazer com este modelo</span></label>
-<button class="pri" onclick="saveCfg()">Salvar</button><button class="dan" onclick="askReset()">Zerar o sistema…</button></div></div>`}
+<button class="pri" onclick="saveCfg()">Salvar</button><button class="dan" style="border-color:var(--ln);color:var(--mut)" onclick="sair()">Sair da conta</button><button class="dan" onclick="askReset()">Zerar o sistema…</button></div></div>`}
 function sal(f){const b=pn($('s_base')),ad=b*pi($('s_pct'))/100;
  if(f==='liq'){$('s_out').value=fm(Math.max(0,b-ad-pn($('s_liq'))))}else{$('s_liq').value=fm(Math.max(0,b-ad-pn($('s_out'))))}
  $('s_ad').value=fm(ad);$('s_tot').textContent=R(ad+pn($('s_out')))}
@@ -482,14 +485,38 @@ function delItem(){const it=ctx.it;
  else{const sc=it.parc?getScope():'one',gone=x=>x===it||(it.parc&&sc!=='one'&&x.gid===it.gid&&(sc==='all'||x.parc.p>=it.parc.p));
   for(const kk in extras){const b=extras[kk].length;extras[kk]=extras[kk].filter(x=>!gone(x));if(extras[kk].length!==b)dirty.ext.add(kk)}}
  $('m2').innerHTML='';flush();ctx.mode==='cfg'?drawCfg():render()}
-/* ---- Ponte: simula google.script.run via fetch para o Apps Script ---- */
-const API_URL='https://script.google.com/macros/s/AKfycbyO5xXoXN6CXmyURsiklkYr8BtWNiqqk1hfUyD_MkKn51BROAImja_0-CpH1M95f6xm/exec';
-const CK='prumo_code';
-const getCode=()=>{try{return localStorage.getItem(CK)||''}catch(e){return ''}};
-function post(fn,args){const ac=new AbortController(),to=setTimeout(()=>ac.abort(),25000);
- return fetch(API_URL,{method:'POST',signal:ac.signal,headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args,code:getCode()})})
- .then(r=>r.json()).then(r=>{if(!r.ok)throw new Error(r.error||'Erro desconhecido');return r.data})
- .catch(e=>{throw(e&&e.name==='AbortError')?new Error('Tempo esgotado ao falar com o servidor. Verifique a conexão.'):e}).finally(()=>clearTimeout(to))}
+/* ---- Ponte: mantém google.script.run, agora gravando no Supabase ---- */
+const SB_URL='https://fjvoaronhxmylxwowjyz.supabase.co';   // Project URL (Project Settings > API)
+const SB_KEY='sb_publishable_AeNBAta1naCFB7rnOIXxuQ_P07QsYqh';                    // chave anon/publishable — NUNCA a service_role
+let sbc=null;
+const SB=()=>sbc||(sbc=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true}}));
+async function uid_(){const {data}=await SB().auth.getSession();if(!data.session)throw new Error('UNAUTHORIZED');return data.session.user.id}
+function ok_(r){if(r.error){const m=String(r.error.message||r.error);if(r.status===401||r.error.code==='PGRST301'||/jwt/i.test(m))throw new Error('UNAUTHORIZED');throw new Error(m)}return r.data}
+async function todos_(t,cols,ord){let out=[];for(let i=0;;i+=1000){const d=ok_(await SB().from(t).select(cols).order(ord).range(i,i+999));out=out.concat(d);if(d.length<1000)return out}}
+const API={
+ async getAll(){await uid_();
+  const [c,ms,ls,xs]=await Promise.all([SB().from('config').select('dados').maybeSingle().then(ok_),todos_('meses','mes,dados','mes'),todos_('lancamentos','*','id'),todos_('caixinha','*','id')]);
+  const snaps={},extras={};ms.forEach(r=>snaps[r.mes]=r.dados);
+  ls.forEach(r=>{const it={id:+r.id,nome:r.nome,valor:+r.valor,cartao:!!r.cartao,dia:r.dia,data:r.data||''};if(r.tipo==='r')it.tipo='r';
+   if(r.parcela&&r.total_parcelas){it.parc={p:r.parcela,n:r.total_parcelas};it.gid=r.grupo||''}(extras[r.mes]=extras[r.mes]||[]).push(it)});
+  return {cfg:c?c.dados:null,snaps,extras,cx:xs.map(r=>({id:+r.id,data:r.data||'',tipo:r.tipo,valor:+r.valor,nome:r.nome||'',dia:r.dia||'d5'}))}},
+ /* grava primeiro e só depois remove o que saiu — assim uma falha no meio não apaga dados */
+ async salvar(p){const u=await uid_(),db=SB();
+  if(p.cfg)ok_(await db.from('config').upsert({user_id:u,dados:p.cfg,atualizado_em:new Date().toISOString()}));
+  if(p.snaps)ok_(await db.from('meses').upsert(Object.keys(p.snaps).map(m=>({user_id:u,mes:m,dados:p.snaps[m]})),{onConflict:'user_id,mes'}));
+  if(p.ext){const ks=Object.keys(p.ext),rows=[];
+   ks.forEach(m=>(p.ext[m]||[]).forEach(it=>rows.push({user_id:u,id:it.id,mes:m,nome:it.nome,valor:it.valor,cartao:!!it.cartao,dia:it.dia||'d5',data:it.data||null,
+    parcela:it.parc?it.parc.p:null,total_parcelas:it.parc?it.parc.n:null,grupo:it.gid||null,tipo:it.tipo==='r'?'r':null})));
+   if(rows.length)ok_(await db.from('lancamentos').upsert(rows,{onConflict:'user_id,id'}));
+   let d=db.from('lancamentos').delete().eq('user_id',u).in('mes',ks);if(rows.length)d=d.not('id','in','('+rows.map(r=>r.id).join(',')+')');ok_(await d)}
+  if(p.cx){const rows=p.cx.map(x=>({user_id:u,id:x.id,data:x.data||null,tipo:x.tipo,valor:x.valor,nome:x.nome||'',dia:x.dia||'d5'}));
+   if(rows.length)ok_(await db.from('caixinha').upsert(rows,{onConflict:'user_id,id'}));
+   let d=db.from('caixinha').delete().eq('user_id',u);if(rows.length)d=d.not('id','in','('+rows.map(r=>r.id).join(',')+')');ok_(await d)}
+  return true},
+ async resetarTudo(){const u=await uid_();for(const t of ['lancamentos','caixinha','meses','config'])ok_(await SB().from(t).delete().eq('user_id',u));return true}
+};
+function post(fn,args){if(!API[fn])return Promise.reject(new Error('Função desconhecida: '+fn));let to;
+ return Promise.race([API[fn](...args),new Promise((_,rej)=>{to=setTimeout(()=>rej(new Error('Tempo esgotado ao falar com o servidor. Verifique a conexão.')),25000)})]).finally(()=>clearTimeout(to))}
 function runner(ok,fail){return new Proxy({},{get(_,p){
  if(p==='withSuccessHandler')return f=>runner(f,fail);
  if(p==='withFailureHandler')return f=>runner(ok,f);
@@ -503,20 +530,26 @@ function flush(){const p={};if(dirty.cfg)p.cfg=cfg;if(dirty.cx)p.cx=cx;
  dirty.cfg=false;dirty.cx=false;dirty.snaps.clear();dirty.ext.clear();
  if(!Object.keys(p).length)return;
  q=q.then(()=>new Promise(res=>google.script.run.withSuccessHandler(()=>res()).withFailureHandler(e=>{res();
-  if(String(e.message).includes('UNAUTHORIZED'))return login('Código inválido.');toast('Erro ao salvar: '+e.message)}).salvar(p)))}
+  if(String(e.message).includes('UNAUTHORIZED'))return login('Sessão expirada. Entre novamente.');toast('Erro ao salvar: '+e.message)}).salvar(p)))}
 /* ---- Acesso e carga ---- */
 function fatal(msg){hideSplash();const a=document.getElementById('app');if(a&&!a.querySelector('.kpis')){a.innerHTML='<div class="box" style="margin-top:18vh"><h4>Algo deu errado</h4><div class="hint" style="word-break:break-word">'+String(msg).replace(/</g,'&lt;')+'</div><button class="pri" onclick="location.reload()">Recarregar</button></div>'}}
 window.addEventListener('error',e=>fatal(e.message||'Erro inesperado'));
 window.addEventListener('unhandledrejection',e=>fatal((e.reason&&e.reason.message)||'Erro inesperado'));
 function login(msg){hideSplash();$('m1').innerHTML='';$('m2').innerHTML='';
- $('app').innerHTML=`<div class="box" style="margin-top:18vh"><h4>Meu Controle Financeiro</h4><label>Código de acesso</label><input id="lg" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
- <div class="hint" style="color:var(--bad)">${msg||''}</div><button class="pri" onclick="doLogin()">Entrar</button></div>`}
-function doLogin(){const v=$('lg').value.trim();if(!v)return;try{localStorage.setItem(CK,v)}catch(e){}load()}
+ $('app').innerHTML=`<div class="box" style="margin-top:18vh"><h4>Meu Controle Financeiro</h4><label for="lg_e">E-mail</label><input id="lg_e" type="email" autocomplete="username" onkeydown="if(event.key==='Enter')$('lg').focus()">
+ <label for="lg">Senha</label><input id="lg" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+ <div class="hint" id="lg_m" style="color:var(--bad)">${msg||''}</div><button class="pri" id="lg_b" onclick="doLogin()">Entrar</button></div>`}
+async function doLogin(){const e=$('lg_e').value.trim(),s=$('lg').value;if(!e||!s){$('lg_m').textContent='Informe e-mail e senha.';return}
+ $('lg_b').disabled=true;$('lg_b').textContent='Entrando…';
+ try{const r=await SB().auth.signInWithPassword({email:e,password:s});if(r.error)throw r.error;load()}
+ catch(x){login(/invalid/i.test(x.message||'')?'E-mail ou senha incorretos.':'Não foi possível entrar: '+(x.message||x));$('lg_e').value=e}}
+async function sair(){try{await SB().auth.signOut()}catch(e){}location.reload()}
 function load(){$('app').innerHTML='<div class="hint" style="text-align:center;margin-top:30vh">Carregando…</div>';
  google.script.run.withSuccessHandler(d=>{cfg=Object.assign(defCfg(),d.cfg||{});snaps=d.snaps||{};extras=d.extras||{};cx=d.cx||[];k=openKey();mes(k);flush();render();hideSplash()})
- .withFailureHandler(e=>{if(String(e.message).includes('UNAUTHORIZED')){try{localStorage.removeItem(CK)}catch(x){}return login('Código inválido.')}
+ .withFailureHandler(e=>{if(String(e.message).includes('UNAUTHORIZED'))return login()
   hideSplash();$('app').innerHTML=`<div class="box" style="margin-top:18vh"><h4>Não foi possível carregar</h4><div class="hint">${e.message}</div><button class="pri" onclick="load()">Tentar de novo</button></div>`}).getAll()}
-function start(){if(API_URL.indexOf('script.google.com')<0){hideSplash();$('app').innerHTML='<div class="box" style="margin-top:18vh"><h4>Falta configurar</h4><div class="hint">Edite a constante API_URL no index.html com a URL do seu App da Web (termina em /exec).</div></div>';return}
- getCode()?load():login()}
+function start(){if(/SEU-PROJETO|SUA-CHAVE/.test(SB_URL+SB_KEY)){hideSplash();$('app').innerHTML='<div class="box" style="margin-top:18vh"><h4>Falta configurar</h4><div class="hint">Edite as constantes SB_URL e SB_KEY no index.html com a URL e a chave anon do projeto no Supabase.</div></div>';return}
+ if(typeof supabase==='undefined')return fatal('Não foi possível carregar o Supabase. Verifique a conexão e recarregue.');
+ SB().auth.getSession().then(({data})=>data.session?load():login()).catch(()=>login())}
 start();
 </script></body></html>
