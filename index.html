@@ -492,10 +492,12 @@ let sbc=null;
 const SB=()=>sbc||(sbc=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true}}));
 async function uid_(){const {data}=await SB().auth.getSession();if(!data.session)throw new Error('UNAUTHORIZED');return data.session.user.id}
 function ok_(r){if(r.error){const m=String(r.error.message||r.error);if(r.status===401||r.error.code==='PGRST301'||/jwt/i.test(m))throw new Error('UNAUTHORIZED');throw new Error(m)}return r.data}
-async function todos_(t,cols,ord){let out=[];for(let i=0;;i+=1000){const d=ok_(await SB().from(t).select(cols).order(ord).range(i,i+999));out=out.concat(d);if(d.length<1000)return out}}
+async function todos_(t,cols,ord,ativos){let out=[];for(let i=0;;i+=1000){let s=SB().from(t).select(cols);if(ativos)s=s.is('excluido_em',null);const d=ok_(await s.order(ord).range(i,i+999));out=out.concat(d);if(d.length<1000)return out}}
+/* exclusão lógica: marca a data/hora em excluido_em em vez de apagar a linha */
+const excluir_=(t,u)=>SB().from(t).update({excluido_em:new Date().toISOString()}).eq('user_id',u).is('excluido_em',null);
 const API={
  async getAll(){await uid_();
-  const [c,ms,ls,xs]=await Promise.all([SB().from('config').select('dados').maybeSingle().then(ok_),todos_('meses','mes,dados','mes'),todos_('lancamentos','*','id'),todos_('caixinha','*','id')]);
+  const [c,ms,ls,xs]=await Promise.all([SB().from('config').select('dados').maybeSingle().then(ok_),todos_('meses','mes,dados','mes'),todos_('lancamentos','*','id',1),todos_('caixinha','*','id',1)]);
   const snaps={},extras={};ms.forEach(r=>snaps[r.mes]=r.dados);
   ls.forEach(r=>{const it={id:+r.id,nome:r.nome,valor:+r.valor,cartao:!!r.cartao,dia:r.dia,data:r.data||''};if(r.tipo==='r')it.tipo='r';
    if(r.parcela&&r.total_parcelas){it.parc={p:r.parcela,n:r.total_parcelas};it.gid=r.grupo||''}(extras[r.mes]=extras[r.mes]||[]).push(it)});
@@ -506,14 +508,15 @@ const API={
   if(p.snaps)ok_(await db.from('meses').upsert(Object.keys(p.snaps).map(m=>({user_id:u,mes:m,dados:p.snaps[m]})),{onConflict:'user_id,mes'}));
   if(p.ext){const ks=Object.keys(p.ext),rows=[];
    ks.forEach(m=>(p.ext[m]||[]).forEach(it=>rows.push({user_id:u,id:it.id,mes:m,nome:it.nome,valor:it.valor,cartao:!!it.cartao,dia:it.dia||'d5',data:it.data||null,
-    parcela:it.parc?it.parc.p:null,total_parcelas:it.parc?it.parc.n:null,grupo:it.gid||null,tipo:it.tipo==='r'?'r':null})));
+    parcela:it.parc?it.parc.p:null,total_parcelas:it.parc?it.parc.n:null,grupo:it.gid||null,tipo:it.tipo==='r'?'r':null,excluido_em:null})));
    if(rows.length)ok_(await db.from('lancamentos').upsert(rows,{onConflict:'user_id,id'}));
-   let d=db.from('lancamentos').delete().eq('user_id',u).in('mes',ks);if(rows.length)d=d.not('id','in','('+rows.map(r=>r.id).join(',')+')');ok_(await d)}
-  if(p.cx){const rows=p.cx.map(x=>({user_id:u,id:x.id,data:x.data||null,tipo:x.tipo,valor:x.valor,nome:x.nome||'',dia:x.dia||'d5'}));
+   let d=excluir_('lancamentos',u).in('mes',ks);if(rows.length)d=d.not('id','in','('+rows.map(r=>r.id).join(',')+')');ok_(await d)}
+  if(p.cx){const rows=p.cx.map(x=>({user_id:u,id:x.id,data:x.data||null,tipo:x.tipo,valor:x.valor,nome:x.nome||'',dia:x.dia||'d5',excluido_em:null}));
    if(rows.length)ok_(await db.from('caixinha').upsert(rows,{onConflict:'user_id,id'}));
-   let d=db.from('caixinha').delete().eq('user_id',u);if(rows.length)d=d.not('id','in','('+rows.map(r=>r.id).join(',')+')');ok_(await d)}
+   let d=excluir_('caixinha',u);if(rows.length)d=d.not('id','in','('+rows.map(r=>r.id).join(',')+')');ok_(await d)}
   return true},
- async resetarTudo(){const u=await uid_();for(const t of ['lancamentos','caixinha','meses','config'])ok_(await SB().from(t).delete().eq('user_id',u));return true}
+ /* zerar: lançamentos e caixinha ficam marcados como excluídos; modelo e cópias dos meses são apagados */
+ async resetarTudo(){const u=await uid_();for(const t of ['lancamentos','caixinha'])ok_(await excluir_(t,u));for(const t of ['meses','config'])ok_(await SB().from(t).delete().eq('user_id',u));return true}
 };
 function post(fn,args){if(!API[fn])return Promise.reject(new Error('Função desconhecida: '+fn));let to;
  return Promise.race([API[fn](...args),new Promise((_,rej)=>{to=setTimeout(()=>rej(new Error('Tempo esgotado ao falar com o servidor. Verifique a conexão.')),25000)})]).finally(()=>clearTimeout(to))}
