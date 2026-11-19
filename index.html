@@ -157,6 +157,7 @@ img.nu{object-fit:cover;display:block}.ic img.nu{width:24px;height:24px;border-r
 .ibar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 10px}.ibar .chk{margin:0;font-size:13px;color:var(--tx)}.ibar .chk input{width:18px;height:18px;accent-color:var(--ac)}
 .iact button{padding:7px 12px;border-radius:99px;border:1px solid var(--ln);background:var(--card);font-size:12.5px;font-weight:600;color:var(--tx)}.iact .ok{background:var(--ac);border-color:var(--ac);color:#06241b}
 .sbt{flex:none;padding:8px 14px;border-radius:10px;border:1px solid var(--ac);background:var(--acs);color:var(--ac);font-weight:700;font-size:13px}.sbt:disabled{opacity:.6}
+.lock{position:fixed;inset:0;z-index:55;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}.lkb{width:100%;max-width:360px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}.lkb h4{margin:10px 0 0;font-size:18px}.lkb .pri{margin-top:14px}
 .lk{background:none;border:0;padding:0;color:var(--ac);font-weight:700;text-decoration:underline}
 .sec .row{padding-left:33px}.sec .row.emp{padding-left:12px}.sec .row .ic{width:26px;height:26px;border-radius:7px}.sec .row .ic svg{width:15px;height:15px}.sec .row .ic img.nu{width:18px;height:18px;border-radius:5px}
 @media(min-width:900px){
@@ -515,6 +516,7 @@ function drawCfg(){const d=draft,ad=adOf(d);$('m1').innerHTML=`<div class="ov" o
 <div class="box"><h4>Cartão de crédito</h4><div class="g2"><div><label>Dia de fechamento</label><input id="c_f" ${DG} value="${d.cartao.fech}" oninput="dg(this,2)"></div><div><label>Dia de vencimento</label><input id="c_v" ${DG} value="${d.cartao.venc}" oninput="dg(this,2)"></div></div>
 <label>Limite</label><input id="c_l" ${MY} value="${fm(d.cartao.limite)}" oninput="mk(this)"></div>
 <label class="chk" style="color:var(--tx);font-size:14px;margin:0 0 12px"><input id="c_ap" type="checkbox" ${(d._ap===undefined?startedMonths().some(emptyM):d._ap)?'checked':''}><span>Ao salvar, escolher meses já iniciados para refazer com este modelo</span></label>
+<div class="box"><h4>Face ID neste aparelho</h4><div class="hint" style="margin:0 0 10px">${bioOn()?'Ativado: o site pede o Face ID (ou a biometria do aparelho) ao abrir e ao voltar depois de '+BIO_MIN+' minutos.':'Peça o Face ID (ou a biometria do aparelho) ao abrir o site. Vale só para este aparelho.'}</div><button class="sbt" onclick="bioToggle()">${bioOn()?'Desativar Face ID':'Ativar Face ID'}</button></div>
 <button class="pri" onclick="saveCfg()">Salvar</button><button class="dan" style="border-color:var(--ln);color:var(--mut)" onclick="sair()">Sair da conta</button><button class="dan" onclick="askReset()">Zerar o sistema…</button></div></div>`}
 function sal(f){const b=pn($('s_base')),ad=b*pi($('s_pct'))/100;
  if(f==='liq'){$('s_out').value=fm(Math.max(0,b-ad-pn($('s_liq'))))}else{$('s_liq').value=fm(Math.max(0,b-ad-pn($('s_out'))))}
@@ -664,6 +666,35 @@ function load(){$('app').innerHTML='<div class="hint" style="text-align:center;m
   hideSplash();$('app').innerHTML=`<div class="box" style="margin-top:18vh"><h4>Não foi possível carregar</h4><div class="hint">${e.message}</div><button class="pri" onclick="load()">Tentar de novo</button></div>`}).getAll()}
 function start(){if(/SEU-PROJETO|SUA-CHAVE/.test(SB_URL+SB_KEY)){hideSplash();$('app').innerHTML='<div class="box" style="margin-top:18vh"><h4>Falta configurar</h4><div class="hint">Edite as constantes SB_URL e SB_KEY no index.html com a URL e a chave anon do projeto no Supabase.</div></div>';return}
  if(typeof supabase==='undefined')return fatal('Não foi possível carregar o Supabase. Verifique a conexão e recarregue.');
- SB().auth.getSession().then(({data})=>data.session?load():login()).catch(()=>login())}
+ SB().auth.getSession().then(({data})=>data.session?(bioOn()?bloquear(load):load()):login()).catch(()=>login())}
+/* ---- Face ID / biometria do aparelho (WebAuthn) ----
+   Trava local deste aparelho: pede a biometria ao abrir o site e ao voltar depois de BIO_MIN minutos.
+   O login com e-mail e senha continua sendo o acesso principal (e a saída se a biometria falhar). */
+const BIO_K='mcf_bio',BIO_MIN=5;
+const bioOn=()=>{try{return !!localStorage.getItem(BIO_K)}catch(e){return false}};
+const b64u=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const ub64=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+async function bioDisp(){try{return !!(window.PublicKeyCredential&&await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable())}catch(e){return false}}
+async function bioAtivar(){if(!await bioDisp())return toast('Este aparelho/navegador não oferece Face ID ou biometria para sites.');
+ try{const {data}=await SB().auth.getSession(),u=data.session.user,nome=u.email||'usuário';
+  const c=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Meu Controle Financeiro'},
+   user:{id:new TextEncoder().encode(u.id).slice(0,64),name:nome,displayName:nome},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+   authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'preferred'},timeout:60000}});
+  localStorage.setItem(BIO_K,b64u(c.rawId));toast('Face ID ativado neste aparelho')}
+ catch(e){toast(e&&e.name==='NotAllowedError'?'Ativação cancelada':'Não foi possível ativar: '+(e.message||e))}}
+function bioDesativar(){try{localStorage.removeItem(BIO_K)}catch(e){}toast('Face ID desativado neste aparelho')}
+async function bioToggle(){readCfg();bioOn()?bioDesativar():await bioAtivar();drawCfg()}
+async function bioVerificar(){const id=localStorage.getItem(BIO_K);
+ await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),allowCredentials:[{type:'public-key',id:ub64(id),transports:['internal']}],userVerification:'required',timeout:60000}})}
+let bioDepois=null,bioSaiu=0;
+function bloquear(depois){bioDepois=depois||null;hideSplash();let el=$('lock');if(!el){el=document.createElement('div');el.id='lock';el.className='lock';document.body.appendChild(el)}
+ el.innerHTML=`<div class="lkb"><svg viewBox="0 0 512 512" width="64" height="64" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#0f8b6d"/><circle cx="256" cy="256" r="150" fill="#fff"/><circle cx="256" cy="256" r="118" fill="none" stroke="#8fe3c6" stroke-width="10"/><path d="M190 262L240 312L330 206" fill="none" stroke="#0f8b6d" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/></svg>
+ <h4>Meu Controle Financeiro</h4><div class="hint" id="lk_m">Use o Face ID para entrar.</div>
+ <button class="pri" onclick="desbloquear()">Desbloquear com Face ID</button><button class="lk" style="margin-top:14px" onclick="sair()">Entrar com e-mail e senha</button></div>`;
+ desbloquear(true)}
+async function desbloquear(auto){try{await bioVerificar();const el=$('lock');if(el)el.remove();const f=bioDepois;bioDepois=null;if(f)f()}
+ catch(e){const m=$('lk_m');if(m&&!auto)m.textContent=e&&e.name==='NotAllowedError'?'Face ID cancelado ou não reconhecido. Tente de novo.':'Não foi possível usar o Face ID: '+(e.message||e)}}
+document.addEventListener('visibilitychange',()=>{if(document.hidden){bioSaiu=Date.now();return}
+ if(bioOn()&&bioSaiu&&Date.now()-bioSaiu>BIO_MIN*6e4&&!$('lock')&&$('app').querySelector('.kpis'))bloquear()});
 start();
 </script></body></html>
