@@ -152,7 +152,9 @@ input,select,textarea{font-size:16px}
 .leg .lg span{display:inline-flex;align-items:center;gap:4px}.lg .nu{width:16px;height:12px}.lg .li svg{width:13px;height:13px}
 img.nu{object-fit:cover;display:block}.ic img.nu{width:24px;height:24px;border-radius:6px}.gi img.nu{width:18px;height:18px;border-radius:5px}.lg img.nu{width:14px;height:14px;border-radius:3px}
 .row.ir{border-bottom:0;cursor:default;padding-bottom:6px}.itg{display:block;font-size:11px;color:var(--wr);font-weight:600;margin-top:2px}
-.iact{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 12px 54px;border-bottom:1px solid var(--ln)}
+.iact{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 12px 82px;border-bottom:1px solid var(--ln)}
+.isel{width:18px;height:18px;flex:none;margin:0;accent-color:var(--ac);cursor:pointer}
+.ibar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 10px}.ibar .chk{margin:0;font-size:13px;color:var(--tx)}.ibar .chk input{width:18px;height:18px;accent-color:var(--ac)}
 .iact button{padding:7px 12px;border-radius:99px;border:1px solid var(--ln);background:var(--card);font-size:12.5px;font-weight:600;color:var(--tx)}.iact .ok{background:var(--ac);border-color:var(--ac);color:#06241b}
 .sbt{flex:none;padding:8px 14px;border-radius:10px;border:1px solid var(--ac);background:var(--acs);color:var(--ac);font-weight:700;font-size:13px}.sbt:disabled{opacity:.6}
 .lk{background:none;border:0;padding:0;color:var(--ac);font-weight:700;text-decoration:underline}
@@ -173,7 +175,7 @@ img.nu{object-fit:cover;display:block}.ic img.nu{width:24px;height:24px;border-r
  .colh .r,.sec .row>b{text-align:right}.sec .row .n small{display:none}.sec .row:hover{background:var(--bg)}
  .tcol,.dcol{display:block}.tcol{font-size:12px;color:var(--mut)}.tcol.c{color:var(--cc)}.tcol.g{color:var(--ok);font-weight:600}.tcol.b{color:var(--bl);font-weight:600}.dcol{font-size:13px;color:var(--mut)}
  .tots{display:flex;background:var(--bg)}.tots .tot{flex:1 1 0;min-width:0}.tots .tot+.tot{border-top:0;border-left:1px solid var(--ln)}.tot{padding:12px 20px}
- .ov{align-items:center}.sheet{border-radius:20px;max-width:480px;max-height:88vh;padding:20px 22px}
+ .ov{align-items:center}.sheet{border-radius:20px;max-width:480px;max-height:88vh;padding:20px 22px}.sheet.sheet-lg{max-width:900px}
 }
 @media(min-width:900px){.app>.box,.app>.hint{grid-column:1/-1;grid-row:2;justify-self:center;width:100%;max-width:400px}}
 </style>
@@ -401,12 +403,18 @@ function toggleTheme(){const r=document.documentElement,d=getComputedStyle(r).ge
 /* ---- A validar: transações do Open Finance (MeuPluggy) aguardando aprovação ---- */
 const INBOX=svg('<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>');
 let imp=[],impCx=[],impAba='pendente',impMsg='',impErr='',impBusy=false;
+const IGN_DIAS=60; // por quantos dias os ignorados aparecem na aba "Ignorados"
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const impN=()=>imp.filter(t=>t.status==='pendente').length;
 const impAPI={
- listar:async()=>ok_(await SB().from('importados').select('*').in('status',['pendente','ignorado']).order('data',{ascending:false}).limit(1000)),
+ /* pendentes: todos | ignorados: só os ignorados nos últimos IGN_DIAS dias (os mais antigos continuam no banco) */
+ listar:async()=>{const corte=new Date(Date.now()-IGN_DIAS*864e5).toISOString(),[p,i]=await Promise.all([
+   SB().from('importados').select('*').eq('status','pendente').order('data',{ascending:false}).limit(1000),
+   SB().from('importados').select('*').eq('status','ignorado').gte('decidido_em',corte).order('data',{ascending:false}).limit(1000)]);
+  return ok_(p).concat(ok_(i))},
  conexoes:async()=>ok_(await SB().from('pluggy_itens').select('item_id,conector,ultima_sinc')),
  decidir:async(id,status,lid)=>ok_(await SB().from('importados').update({status,lancamento_id:status==='aprovado'?lid:null,decidido_em:status==='pendente'?null:new Date().toISOString()}).eq('id',id)),
+ decidirVarios:async(ids,status)=>ok_(await SB().from('importados').update({status,lancamento_id:null,decidido_em:status==='pendente'?null:new Date().toISOString()}).in('id',ids)),
  fn:async(acao,extra)=>{const r=await SB().functions.invoke('pluggy',{body:Object.assign({acao},extra||{})});
   if(r.error){let m=r.error.message;try{const b=await r.error.context.json();if(b&&b.erro)m=b.erro}catch(e){}throw new Error(m)}
   if(r.data&&r.data.erro)throw new Error(r.data.erro);return r.data}
@@ -436,16 +444,29 @@ function impRow(t){const s=impSug(t),card=t.conta_tipo==='CREDIT',ent=t.moviment
  act=impAba!=='pendente'?`<button onclick="impDec('${id}','pendente')">Voltar para pendentes</button>`
   :s.tp==='ign'?`<button class="ok" onclick="impDec('${id}','ignorado')">Ignorar</button><button onclick="impLancar('${id}')">Lançar mesmo assim</button>`
   :`<button class="ok" onclick="impLancar('${id}')">${LB[base]}</button><button onclick="impDec('${id}','ignorado')">Ignorar</button>`;
- return `<div class="row ${vis[0]} ir"><div class="ic">${vis[1]}</div><div class="n"><div>${esc(t.descricao)}</div><small>${card?'Cartão':'Conta'} · ${fmtD(t.data)}${t.parcela&&t.total_parcelas?' · parcela '+t.parcela+'/'+t.total_parcelas:''}</small>${tags}</div><b class="${ent?'in':''}">${ent?'+':'−'} ${R(+t.valor)}</b></div><div class="iact">${act}</div>`}
-function impDraw(soAberto){if(soAberto&&!$('impx'))return;
- const L=imp.filter(t=>t.status===impAba),ni=imp.filter(t=>t.status==='ignorado').length,ult=impCx.map(c=>c.ultima_sinc).filter(Boolean).sort().pop();
+ return `<div class="row ${vis[0]} ir"><input type="checkbox" class="isel" aria-label="Selecionar" ${impSel.has(t.id)?'checked':''} onchange="impTog('${id}',this.checked)"><div class="ic">${vis[1]}</div><div class="n"><div>${esc(t.descricao)}</div><small>${card?'Cartão':'Conta'} · ${fmtD(t.data)}${t.parcela&&t.total_parcelas?' · parcela '+t.parcela+'/'+t.total_parcelas:''}</small>${tags}</div><b class="${ent?'in':''}">${ent?'+':'−'} ${R(+t.valor)}</b></div><div class="iact">${act}</div>`}
+function impDraw(soAberto){if(soAberto&&!$('impx'))return;const sh=document.querySelector('#impx .sheet'),top=sh?sh.scrollTop:0;
+ const L=imp.filter(t=>t.status===impAba);impSel.forEach(id=>{if(!L.some(t=>t.id===id))impSel.delete(id)});const ni=imp.filter(t=>t.status==='ignorado').length,ult=impCx.map(c=>c.ultima_sinc).filter(Boolean).sort().pop();
  const con=impCx.length?`<div class="sum" style="border:0;margin:0;padding:0;align-items:center;gap:10px"><span>Conectado: <b>${esc(impCx.map(c=>c.conector||'Open Finance').join(', '))}</b><small class="sub2">${ult?'Atualizado '+quando(ult):'Ainda não atualizado'}</small></span><button class="sbt" onclick="impSync()" ${impBusy?'disabled':''}>${impBusy?'Atualizando…':'Atualizar'}</button></div>`
   :`<div class="hint" style="margin:0 0 4px">Conecte sua conta pelo MeuPluggy (Open Finance) para trazer as transações automaticamente.</div><button class="pri" onclick="impConectar()">Conectar conta</button>`;
- $('m1').innerHTML=`<div class="ov" id="impx" onclick="if(event.target===this)$('m1').innerHTML=''"><div class="sheet"><h3>A validar <button class="ib" onclick="$('m1').innerHTML=''" aria-label="Fechar">✕</button></h3>
+ $('m1').innerHTML=`<div class="ov" id="impx" onclick="if(event.target===this)$('m1').innerHTML=''"><div class="sheet sheet-lg"><h3>A validar <button class="ib" onclick="$('m1').innerHTML=''" aria-label="Fechar">✕</button></h3>
  <div class="box">${con}</div>${impErr?`<div class="hint" style="color:var(--bad);margin:-4px 0 10px">Não foi possível ler as transações: ${esc(impErr)}</div>`:''}
- <div class="seg"><button class="${impAba==='pendente'?'on':''}" onclick="impAba='pendente';impDraw()">Pendentes (${impN()})</button><button class="${impAba==='ignorado'?'on':''}" onclick="impAba='ignorado';impDraw()">Ignorados (${ni})</button></div>
+ <div class="seg"><button class="${impAba==='pendente'?'on':''}" onclick="impAba='pendente';impSel.clear();impDraw()">Pendentes (${impN()})</button><button class="${impAba==='ignorado'?'on':''}" onclick="impAba='ignorado';impSel.clear();impDraw()">Ignorados (${ni})</button></div>
  ${impMsg?`<div class="hint" style="margin:-2px 0 10px">${impMsg}</div>`:''}
- <div class="box" style="padding:0;overflow:hidden">${L.map(impRow).join('')||`<div class="row" style="cursor:default;color:var(--mut)">${impAba==='pendente'?'Nenhuma transação para validar.':'Nenhuma transação ignorada.'}</div>`}</div></div></div>`}
+ ${impAba==='ignorado'?`<div class="hint" style="margin:-2px 0 10px">Mostrando o que foi ignorado nos últimos ${IGN_DIAS} dias.</div>`:''}
+ ${L.length?`<div class="ibar"><label class="chk"><input type="checkbox" id="imp_all" onchange="impTodos(this.checked)"><span>Selecionar todos</span></label><button class="sbt" id="imp_lote" onclick="impLote()"></button></div>`:''}
+ <div class="box" style="padding:0;overflow:hidden">${L.map(impRow).join('')||`<div class="row" style="cursor:default;color:var(--mut)">${impAba==='pendente'?'Nenhuma transação para validar.':'Nenhuma transação ignorada nos últimos '+IGN_DIAS+' dias.'}</div>`}</div></div></div>`;
+ const nsh=document.querySelector('#impx .sheet');if(nsh)nsh.scrollTop=top;impBar()}
+/* seleção de vários lançamentos para ignorar (ou voltar para pendentes) de uma vez */
+const impSel=new Set();
+function impBar(){const b=$('imp_lote'),a=$('imp_all');if(!b)return;const n=impSel.size,tot=imp.filter(t=>t.status===impAba).length;
+ b.textContent=(impAba==='pendente'?'Ignorar selecionados':'Voltar para pendentes')+(n?' ('+n+')':'');b.disabled=!n;a.checked=n>0&&n===tot;a.indeterminate=n>0&&n<tot}
+function impTog(id,on){on?impSel.add(id):impSel.delete(id);impBar()}
+function impTodos(on){impSel.clear();if(on)imp.filter(t=>t.status===impAba).forEach(t=>impSel.add(t.id));document.querySelectorAll('#impx .isel').forEach(c=>c.checked=on);impBar()}
+function impLote(){const ids=[...impSel],st=impAba==='pendente'?'ignorado':'pendente';if(!ids.length)return;
+ imp.forEach(t=>{if(impSel.has(t.id))t.status=st});impSel.clear();impDraw(true);render();
+ toast(ids.length+(ids.length>1?' transações ':' transação ')+(st==='ignorado'?'ignorada'+(ids.length>1?'s':''):'de volta para pendentes'));
+ q=q.then(()=>impAPI.decidirVarios(ids,st)).catch(e=>toast('Erro ao salvar a validação: '+e.message))}
 function openImp(){impMsg='';impDraw();const ult=impCx.map(c=>c.ultima_sinc).filter(Boolean).sort().pop();if(impCx.length&&!impBusy&&(!ult||Date.now()-new Date(ult)>6*36e5))impSync(true)}
 function impDec(id,st,lid){const t=imp.find(x=>x.id===id);if(t)t.status=st;impDraw(true);render();
  q=q.then(()=>impAPI.decidir(id,st,lid)).catch(e=>toast('Erro ao salvar a validação: '+e.message))}
