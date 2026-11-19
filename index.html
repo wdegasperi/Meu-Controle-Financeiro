@@ -516,7 +516,7 @@ function drawCfg(){const d=draft,ad=adOf(d);$('m1').innerHTML=`<div class="ov" o
 <div class="box"><h4>Cartão de crédito</h4><div class="g2"><div><label>Dia de fechamento</label><input id="c_f" ${DG} value="${d.cartao.fech}" oninput="dg(this,2)"></div><div><label>Dia de vencimento</label><input id="c_v" ${DG} value="${d.cartao.venc}" oninput="dg(this,2)"></div></div>
 <label>Limite</label><input id="c_l" ${MY} value="${fm(d.cartao.limite)}" oninput="mk(this)"></div>
 <label class="chk" style="color:var(--tx);font-size:14px;margin:0 0 12px"><input id="c_ap" type="checkbox" ${(d._ap===undefined?startedMonths().some(emptyM):d._ap)?'checked':''}><span>Ao salvar, escolher meses já iniciados para refazer com este modelo</span></label>
-<div class="box"><h4>Face ID neste aparelho</h4><div class="hint" style="margin:0 0 10px">${bioOn()?'Ativado: o site pede o Face ID (ou a biometria do aparelho) ao abrir e ao voltar depois de '+BIO_MIN+' minutos.':'Peça o Face ID (ou a biometria do aparelho) ao abrir o site. Vale só para este aparelho.'}</div><button class="sbt" onclick="bioToggle()">${bioOn()?'Desativar Face ID':'Ativar Face ID'}</button></div>
+<div class="box"><h4>Face ID neste aparelho</h4><div class="hint" style="margin:0 0 10px">${bioOn()?'Ativado: ao abrir o site, toque em "Desbloquear com Face ID" para entrar.':'Pede o Face ID (ou a biometria do aparelho) ao abrir o site. Vale só para este aparelho.'}</div><button class="sbt" onclick="bioToggle()">${bioOn()?'Desativar Face ID':'Ativar Face ID'}</button></div>
 <button class="pri" onclick="saveCfg()">Salvar</button><button class="dan" style="border-color:var(--ln);color:var(--mut)" onclick="sair()">Sair da conta</button><button class="dan" onclick="askReset()">Zerar o sistema…</button></div></div>`}
 function sal(f){const b=pn($('s_base')),ad=b*pi($('s_pct'))/100;
  if(f==='liq'){$('s_out').value=fm(Math.max(0,b-ad-pn($('s_liq'))))}else{$('s_liq').value=fm(Math.max(0,b-ad-pn($('s_out'))))}
@@ -668,9 +668,9 @@ function start(){if(/SEU-PROJETO|SUA-CHAVE/.test(SB_URL+SB_KEY)){hideSplash();$(
  if(typeof supabase==='undefined')return fatal('Não foi possível carregar o Supabase. Verifique a conexão e recarregue.');
  SB().auth.getSession().then(({data})=>data.session?(bioOn()?bloquear(load):load()):login()).catch(()=>login())}
 /* ---- Face ID / biometria do aparelho (WebAuthn) ----
-   Trava local deste aparelho: pede a biometria ao abrir o site e ao voltar depois de BIO_MIN minutos.
+   Trava local deste aparelho: ao abrir o site (como o login), pede a biometria só depois do toque no botão.
    O login com e-mail e senha continua sendo o acesso principal (e a saída se a biometria falhar). */
-const BIO_K='mcf_bio',BIO_MIN=5;
+const BIO_K='mcf_bio';
 const bioOn=()=>{try{return !!localStorage.getItem(BIO_K)}catch(e){return false}};
 const b64u=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const ub64=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
@@ -686,15 +686,12 @@ function bioDesativar(){try{localStorage.removeItem(BIO_K)}catch(e){}toast('Face
 async function bioToggle(){readCfg();bioOn()?bioDesativar():await bioAtivar();drawCfg()}
 async function bioVerificar(){const id=localStorage.getItem(BIO_K);
  await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),allowCredentials:[{type:'public-key',id:ub64(id),transports:['internal']}],userVerification:'required',timeout:60000}})}
-let bioDepois=null,bioSaiu=0;
+let bioDepois=null;
 function bloquear(depois){bioDepois=depois||null;hideSplash();let el=$('lock');if(!el){el=document.createElement('div');el.id='lock';el.className='lock';document.body.appendChild(el)}
  el.innerHTML=`<div class="lkb"><svg viewBox="0 0 512 512" width="64" height="64" aria-hidden="true"><rect width="512" height="512" rx="112" fill="#0f8b6d"/><circle cx="256" cy="256" r="150" fill="#fff"/><circle cx="256" cy="256" r="118" fill="none" stroke="#8fe3c6" stroke-width="10"/><path d="M190 262L240 312L330 206" fill="none" stroke="#0f8b6d" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/></svg>
- <h4>Meu Controle Financeiro</h4><div class="hint" id="lk_m">Use o Face ID para entrar.</div>
- <button class="pri" onclick="desbloquear()">Desbloquear com Face ID</button><button class="lk" style="margin-top:14px" onclick="sair()">Entrar com e-mail e senha</button></div>`;
- desbloquear(true)}
-async function desbloquear(auto){try{await bioVerificar();const el=$('lock');if(el)el.remove();const f=bioDepois;bioDepois=null;if(f)f()}
- catch(e){const m=$('lk_m');if(m&&!auto)m.textContent=e&&e.name==='NotAllowedError'?'Face ID cancelado ou não reconhecido. Tente de novo.':'Não foi possível usar o Face ID: '+(e.message||e)}}
-document.addEventListener('visibilitychange',()=>{if(document.hidden){bioSaiu=Date.now();return}
- if(bioOn()&&bioSaiu&&Date.now()-bioSaiu>BIO_MIN*6e4&&!$('lock')&&$('app').querySelector('.kpis'))bloquear()});
+ <h4>Meu Controle Financeiro</h4><div class="hint" id="lk_m">Toque no botão abaixo para entrar com o Face ID.</div>
+ <button class="pri" onclick="desbloquear()">Desbloquear com Face ID</button><button class="lk" style="margin-top:14px" onclick="sair()">Entrar com e-mail e senha</button></div>`}
+async function desbloquear(){try{await bioVerificar();const el=$('lock');if(el)el.remove();const f=bioDepois;bioDepois=null;if(f)f()}
+ catch(e){const m=$('lk_m');if(m)m.textContent=e&&e.name==='NotAllowedError'?'Face ID cancelado ou não reconhecido. Tente de novo.':'Não foi possível usar o Face ID: '+(e.message||e)}}
 start();
 </script></body></html>
