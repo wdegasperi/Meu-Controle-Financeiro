@@ -151,8 +151,29 @@ input,select,textarea{font-size:16px}
 .tot>span:first-child{display:inline-flex;align-items:center;gap:6px}.tot svg{width:16px;height:16px}
 .leg .lg span{display:inline-flex;align-items:center;gap:4px}.lg .nu{width:16px;height:12px}.lg .li svg{width:13px;height:13px}
 img.nu{object-fit:cover;display:block}.ic img.nu{width:24px;height:24px;border-radius:6px}.gi img.nu{width:18px;height:18px;border-radius:5px}.lg img.nu{width:14px;height:14px;border-radius:3px}
-.row.ir{border-bottom:0;cursor:default;padding-bottom:6px}.itg{display:block;font-size:11px;color:var(--wr);font-weight:600;margin-top:2px}
-.iact{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 12px 82px;border-bottom:1px solid var(--ln)}
+.row.ir{border-bottom:0;cursor:default}.itg{display:block;font-size:11px;color:var(--wr);font-weight:600;margin-top:2px}
+/* A validar: no celular arrasta para o lado (botões só no PC) */
+.isw{position:relative;overflow:hidden;border-bottom:1px solid var(--ln)}.isw:last-child{border-bottom:0}
+.ifg{position:relative;background:var(--card);touch-action:pan-y;transition:transform .2s ease;user-select:none;-webkit-user-select:none}
+.ibg{position:absolute;inset:0;display:none;align-items:center;padding:0 18px;font-size:13px;font-weight:700;opacity:.55;transition:opacity .15s}
+.isw.sr .ibg.r{display:flex;justify-content:flex-start}.isw.sl .ibg.l{display:flex;justify-content:flex-end}.isw.go .ibg{opacity:1}
+.ibg.lan{background:var(--acs);color:var(--ac)}.ibg.ign{background:var(--ln);color:var(--tx)}.ibg.pen{background:var(--bls);color:var(--bl)}
+.iact{display:none;gap:6px}.ish{margin:-4px 2px 10px;font-size:12px}
+.itb{display:flex;align-items:center;gap:6px;margin:0 0 10px}.itb input{flex:1 1 88px;min-width:88px;height:38px;padding:0 10px}
+.itb select{width:auto;flex:none;height:38px;padding:0 6px;font-size:14px;font-weight:600;border-radius:10px}
+.ipg{display:flex;align-items:center;gap:4px;flex:none}.ipg span{min-width:30px;text-align:center;font-size:13px;color:var(--mut)}
+.ipg button{margin:0;width:30px;height:38px;border-radius:10px;font-size:18px;line-height:1;padding:0;background:var(--tx);color:var(--bg);border:1px solid var(--tx)}
+.ipg button:disabled{background:var(--card);color:var(--mut);border-color:var(--ln);opacity:.6}
+.ift{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px;color:var(--mut)}.ift .ipg button{width:32px;height:32px}
+/* barra de rolagem das janelas no tema do sistema */
+.sheet{scrollbar-width:thin;scrollbar-color:var(--ln) transparent;scrollbar-color:color-mix(in srgb,var(--mut) 45%,transparent) transparent}
+.sheet::-webkit-scrollbar{width:10px}.sheet::-webkit-scrollbar-track{background:transparent}
+.sheet::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--mut) 45%,transparent);border-radius:99px;border:3px solid var(--bg)}
+@media(min-width:900px){
+ .ish{display:none}.ifg{touch-action:auto;user-select:auto;-webkit-user-select:auto}
+ .row.ir{display:grid;grid-template-columns:18px 26px minmax(0,1fr) 112px 300px;gap:12px;align-items:center;padding:8px 14px}
+ .row.ir>b{text-align:right;white-space:nowrap}.iact{display:flex;flex-wrap:nowrap}
+}
 .isel{width:18px;height:18px;flex:none;margin:0;accent-color:var(--ac);cursor:pointer}
 .ibar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 10px}.ibar .chk{margin:0;font-size:13px;color:var(--tx)}.ibar .chk input{width:18px;height:18px;accent-color:var(--ac)}
 .iact button{padding:7px 12px;border-radius:99px;border:1px solid var(--ln);background:var(--card);font-size:12.5px;font-weight:600;color:var(--tx)}.iact .ok{background:var(--ac);border-color:var(--ac);color:#06241b}
@@ -404,6 +425,7 @@ function toggleTheme(){const r=document.documentElement,d=getComputedStyle(r).ge
 /* ---- A validar: transações do Open Finance (MeuPluggy) aguardando aprovação ---- */
 const INBOX=svg('<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>');
 let imp=[],impCx=[],impAba='pendente',impMsg='',impErr='',impBusy=false;
+let impQ='',impPg=1,impPP=(()=>{try{return +localStorage.getItem('prumo_imp_pp')||20}catch(e){return 20}})();
 const IGN_DIAS=60; // por quantos dias os ignorados aparecem na aba "Ignorados"
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const impN=()=>imp.filter(t=>t.status==='pendente').length;
@@ -444,26 +466,60 @@ function impRow(t){const s=impSug(t),card=t.conta_tipo==='CREDIT',ent=t.moviment
  tags=(s.tp==='ign'?`<span class="itg">Sugestão: ignorar · ${s.why}</span>`:'')+(pf?`<span class="itg" style="color:var(--cc)">Fatura de ${lbl(fk)} · total ${R(fatTot(fk))}</span>`:'')+(dup?`<span class="itg">Já lançado? Parecido com ${esc(dup.nome)} · ${fmtS(dup.data)}</span>`:''),
  act=impAba!=='pendente'?`<button onclick="impDec('${id}','pendente')">Voltar para pendentes</button>`
   :s.tp==='ign'?`<button class="ok" onclick="impDec('${id}','ignorado')">Ignorar</button><button onclick="impLancar('${id}')">Lançar mesmo assim</button>`
-  :`<button class="ok" onclick="impLancar('${id}')">${LB[base]}</button><button onclick="impDec('${id}','ignorado')">Ignorar</button>`;
- return `<div class="row ${vis[0]} ir"><input type="checkbox" class="isel" aria-label="Selecionar" ${impSel.has(t.id)?'checked':''} onchange="impTog('${id}',this.checked)"><div class="ic">${vis[1]}</div><div class="n"><div>${esc(t.descricao)}</div><small>${card?'Cartão':'Conta'} · ${fmtD(t.data)}${t.parcela&&t.total_parcelas?' · parcela '+t.parcela+'/'+t.total_parcelas:''}</small>${tags}</div><b class="${ent?'in':''}">${ent?'+':'−'} ${R(+t.valor)}</b></div><div class="iact">${act}</div>`}
+  :`<button class="ok" onclick="impLancar('${id}')">${LB[base]}</button><button onclick="impDec('${id}','ignorado')">Ignorar</button>`,
+ /* arrastar: para a direita = botão da esquerda; para a esquerda = botão da direita */
+ sw=impAba!=='pendente'?[['pen','Voltar para pendentes'],['pen','Voltar para pendentes']]
+  :s.tp==='ign'?[['ign','Ignorar'],['lan','Lançar mesmo assim']]:[['lan',LB[base]],['ign','Ignorar']];
+ return `<div class="isw" data-id="${id}" data-r="${sw[0][0]}" data-l="${sw[1][0]}"><div class="ibg r ${sw[0][0]}">${sw[0][1]} →</div><div class="ibg l ${sw[1][0]}">← ${sw[1][1]}</div><div class="row ${vis[0]} ir ifg"><input type="checkbox" class="isel" aria-label="Selecionar" ${impSel.has(t.id)?'checked':''} onchange="impTog('${id}',this.checked)"><div class="ic">${vis[1]}</div><div class="n"><div>${esc(t.descricao)}</div><small>${card?'Cartão':'Conta'} · ${fmtD(t.data)}${t.parcela&&t.total_parcelas?' · parcela '+t.parcela+'/'+t.total_parcelas:''}</small>${tags}</div><b class="${ent?'in':''}">${ent?'+':'−'} ${R(+t.valor)}</b><div class="iact">${act}</div></div></div>`}
 function impDraw(soAberto){if(soAberto&&!$('impx'))return;const sh=document.querySelector('#impx .sheet'),top=sh?sh.scrollTop:0;
- const L=imp.filter(t=>t.status===impAba);impSel.forEach(id=>{if(!L.some(t=>t.id===id))impSel.delete(id)});const ni=imp.filter(t=>t.status==='ignorado').length,ult=impCx.map(c=>c.ultima_sinc).filter(Boolean).sort().pop();
+ const L=imp.filter(t=>t.status===impAba);const ni=imp.filter(t=>t.status==='ignorado').length,ult=impCx.map(c=>c.ultima_sinc).filter(Boolean).sort().pop();
  const con=impCx.length?`<div class="sum" style="border:0;margin:0;padding:0;align-items:center;gap:10px"><span>Conectado: <b>${esc(impCx.map(c=>c.conector||'Open Finance').join(', '))}</b><small class="sub2">${ult?'Atualizado '+quando(ult):'Ainda não atualizado'}</small></span><button class="sbt" onclick="impSync()" ${impBusy?'disabled':''}>${impBusy?'Atualizando…':'Atualizar'}</button></div>`
   :`<div class="hint" style="margin:0 0 4px">Conecte sua conta pelo MeuPluggy (Open Finance) para trazer as transações automaticamente.</div><button class="pri" onclick="impConectar()">Conectar conta</button>`;
  $('m1').innerHTML=`<div class="ov" id="impx" onclick="if(event.target===this)$('m1').innerHTML=''"><div class="sheet sheet-lg"><h3>A validar <button class="ib" onclick="$('m1').innerHTML=''" aria-label="Fechar">✕</button></h3>
  <div class="box">${con}</div>${impErr?`<div class="hint" style="color:var(--bad);margin:-4px 0 10px">Não foi possível ler as transações: ${esc(impErr)}</div>`:''}
- <div class="seg"><button class="${impAba==='pendente'?'on':''}" onclick="impAba='pendente';impSel.clear();impDraw()">Pendentes (${impN()})</button><button class="${impAba==='ignorado'?'on':''}" onclick="impAba='ignorado';impSel.clear();impDraw()">Ignorados (${ni})</button></div>
+ <div class="seg"><button class="${impAba==='pendente'?'on':''}" onclick="impAba='pendente';impPg=1;impSel.clear();impDraw()">Pendentes (${impN()})</button><button class="${impAba==='ignorado'?'on':''}" onclick="impAba='ignorado';impPg=1;impSel.clear();impDraw()">Ignorados (${ni})</button></div>
  ${impMsg?`<div class="hint" style="margin:-2px 0 10px">${impMsg}</div>`:''}
  ${impAba==='ignorado'?`<div class="hint" style="margin:-2px 0 10px">Mostrando o que foi ignorado nos últimos ${IGN_DIAS} dias.</div>`:''}
- ${L.length?`<div class="ibar"><label class="chk"><input type="checkbox" id="imp_all" onchange="impTodos(this.checked)"><span>Selecionar todos</span></label><button class="sbt" id="imp_lote" onclick="impLote()"></button></div>`:''}
- <div class="box" style="padding:0;overflow:hidden">${L.map(impRow).join('')||`<div class="row" style="cursor:default;color:var(--mut)">${impAba==='pendente'?'Nenhuma transação para validar.':'Nenhuma transação ignorada nos últimos '+IGN_DIAS+' dias.'}</div>`}</div></div></div>`;
- const nsh=document.querySelector('#impx .sheet');if(nsh)nsh.scrollTop=top;impBar()}
+ ${L.length?`<div class="itb"><input id="imp_q" type="search" placeholder="Buscar…" autocomplete="off" aria-label="Buscar transações" value="${esc(impQ)}" oninput="impQ=this.value;impPg=1;impList()"><select aria-label="Itens por página" title="Itens por página" onchange="impSetPP(this.value)">${[10,20,50,100].map(n=>`<option value="${n}" ${n===impPP?'selected':''}>${n}</option>`).join('')}</select><span class="ipg" id="imp_pg"></span></div>
+ <div class="ibar"><label class="chk"><input type="checkbox" id="imp_all" onchange="impTodos(this.checked)"><span>Selecionar todos</span></label><button class="sbt" id="imp_lote" onclick="impLote()"></button></div>
+ <div class="hint ish">Arraste para o lado: → ${impAba==='pendente'?'lançar':'voltar para pendentes'} · ← ${impAba==='pendente'?'ignorar':'voltar para pendentes'}</div>`:''}
+ <div id="impL"></div></div></div>`;
+ impList();const nsh=document.querySelector('#impx .sheet');if(nsh)nsh.scrollTop=top}
+/* filtro da pesquisa (descrição, comércio, pagador, data, valor, parcela) */
+function impFil(){const L=imp.filter(t=>t.status===impAba),q=norm(impQ.trim());if(!q)return L;
+ return L.filter(t=>norm([t.descricao,t.comercio,t.pagador,fmtD(t.data),fm(+t.valor),t.parcela&&t.total_parcelas?t.parcela+'/'+t.total_parcelas:''].join(' ')).includes(q))}
+const impPgr=np=>`<button onclick="impIr(-1)" ${impPg<=1?'disabled':''} aria-label="Página anterior">‹</button><span>${impPg}/${np}</span><button onclick="impIr(1)" ${impPg>=np?'disabled':''} aria-label="Próxima página">›</button>`;
+function impList(){const el=$('impL');if(!el)return;const F=impFil(),np=Math.max(1,Math.ceil(F.length/impPP));impPg=Math.min(Math.max(1,impPg),np);
+ impSel.forEach(id=>{if(!F.some(t=>t.id===id))impSel.delete(id)});
+ const a=(impPg-1)*impPP,P=F.slice(a,a+impPP),q=impQ.trim(),
+  vz=q?'Nada encontrado para “'+esc(q)+'”.':impAba==='pendente'?'Nenhuma transação para validar.':'Nenhuma transação ignorada nos últimos '+IGN_DIAS+' dias.';
+ el.innerHTML=`<div class="box" style="padding:0;overflow:hidden">${P.map(impRow).join('')||`<div class="row" style="cursor:default;color:var(--mut)">${vz}</div>`}</div>`
+  +(np>1?`<div class="ift"><span>${a+1}–${a+P.length} de ${F.length}</span><span class="ipg">${impPgr(np)}</span></div>`:'');
+ const pg=$('imp_pg');if(pg)pg.innerHTML=impPgr(np);
+ el.onpointerdown=impSwDown;el.onpointermove=impSwMove;el.onpointerup=el.onpointercancel=impSwUp;impBar()}
+function impIr(n){impPg+=n;impList();const sh=document.querySelector('#impx .sheet');if(sh)sh.scrollTop=0}
+function impSetPP(v){impPP=+v;try{localStorage.setItem('prumo_imp_pp',String(impPP))}catch(e){}impPg=1;impList()}
+/* celular: arrastar a transação para o lado no lugar dos botões */
+let impSw=null;
+const impLim=w=>Math.min(110,w.offsetWidth*.35);
+function impSwDown(e){if(window.innerWidth>=900||(e.pointerType==='mouse'&&e.button!==0))return;
+ const fg=e.target.closest('.ifg');if(!fg||e.target.closest('input,button,select'))return;
+ impSw={fg,w:fg.parentNode,x:e.clientX,y:e.clientY,dx:0,on:false,id:e.pointerId};fg.style.transition='none'}
+function impSwMove(e){const s=impSw;if(!s||e.pointerId!==s.id)return;let dx=e.clientX-s.x;const dy=e.clientY-s.y;
+ if(!s.on){if(Math.abs(dx)<8&&Math.abs(dy)<8)return;if(Math.abs(dy)>=Math.abs(dx)){s.fg.style.transition='';impSw=null;return}
+  s.on=true;try{s.fg.setPointerCapture(s.id)}catch(x){}}
+ s.dx=dx;s.fg.style.transform='translateX('+dx+'px)';s.w.classList.toggle('sr',dx>0);s.w.classList.toggle('sl',dx<0);s.w.classList.toggle('go',Math.abs(dx)>=impLim(s.w))}
+function impSwUp(e){const s=impSw;if(!s||e.pointerId!==s.id)return;impSw=null;const {fg,w}=s;fg.style.transition='';
+ const a=s.on&&Math.abs(s.dx)>=impLim(w)?(s.dx>0?w.dataset.r:w.dataset.l):'',id=w.dataset.id,volta=()=>{fg.style.transform='';w.classList.remove('sr','sl','go')};
+ if(!a)return volta();
+ if(a==='lan'){volta();return impLancar(id)}
+ fg.style.transform='translateX('+(s.dx>0?'':'-')+'110%)';setTimeout(()=>impDec(id,a==='ign'?'ignorado':'pendente'),180)}
 /* seleção de vários lançamentos para ignorar (ou voltar para pendentes) de uma vez */
 const impSel=new Set();
-function impBar(){const b=$('imp_lote'),a=$('imp_all');if(!b)return;const n=impSel.size,tot=imp.filter(t=>t.status===impAba).length;
+function impBar(){const b=$('imp_lote'),a=$('imp_all');if(!b)return;const n=impSel.size,tot=impFil().length;
  b.textContent=(impAba==='pendente'?'Ignorar selecionados':'Voltar para pendentes')+(n?' ('+n+')':'');b.disabled=!n;a.checked=n>0&&n===tot;a.indeterminate=n>0&&n<tot}
 function impTog(id,on){on?impSel.add(id):impSel.delete(id);impBar()}
-function impTodos(on){impSel.clear();if(on)imp.filter(t=>t.status===impAba).forEach(t=>impSel.add(t.id));document.querySelectorAll('#impx .isel').forEach(c=>c.checked=on);impBar()}
+function impTodos(on){impSel.clear();if(on)impFil().forEach(t=>impSel.add(t.id));document.querySelectorAll('#impx .isel').forEach(c=>c.checked=on);impBar()}
 function impLote(){const ids=[...impSel],st=impAba==='pendente'?'ignorado':'pendente';if(!ids.length)return;
  imp.forEach(t=>{if(impSel.has(t.id))t.status=st});impSel.clear();impDraw(true);render();
  toast(ids.length+(ids.length>1?' transações ':' transação ')+(st==='ignorado'?'ignorada'+(ids.length>1?'s':''):'de volta para pendentes'));
