@@ -435,8 +435,8 @@ function impDup(t){const d0=new Date(t.data),perto=d=>d&&Math.abs(new Date(d)-d0
  for(const x of cx)if(x.tipo!=='i'&&ig(x.valor)&&perto(x.data))return {nome:x.nome||'Caixinha',data:x.data};
  const key=t.data.slice(0,7),sn=snaps[key]||{fixos:cfg.fixos};for(const f of sn.fixos||[])if(ig(f.valor))return {nome:f.nome,data:dateOf(key,f.dv)};return null}
 const impDia=d=>+d.slice(8,10)>=20?'d20':'d5';
-/* cartão: usa a data da compra; parcelas vêm com a data da compra original, então avança 1 mês por parcela */
-function impDataCartao(t){const n=+t.parcela||1;return n>1?addMD(t.data,n-1):t.data}
+/* cartão: usa a data como veio do banco (para parcelas, a Pluggy já manda a data da própria parcela) */
+function impDataCartao(t){return t.data}
 function quando(iso){const h=(Date.now()-new Date(iso))/36e5;if(h<1)return 'há poucos minutos';if(h<24)return 'há '+Math.floor(h)+' h';const d=new Date(iso);return 'em '+pad(d.getDate())+'/'+pad(d.getMonth()+1)+' às '+pad(d.getHours())+':'+pad(d.getMinutes())}
 function impRow(t){const s=impSug(t),card=t.conta_tipo==='CREDIT',ent=t.movimento==='entrada',pf=s.tp==='pf',dup=pf?null:impDup(t),id=esc(t.id),
  vis=s.tp==='xg'||s.tp==='xr'?['cxr',SAFE]:card||pf?['cc',CARD]:ent?['rec',PLUS]:['dsp',MINUS],base=s.tp==='ign'?(card?'c':ent?'r':'d'):s.tp,
