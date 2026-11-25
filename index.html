@@ -118,7 +118,10 @@ input,select,textarea{font-size:16px}
 .top .sb{position:relative}.csel{position:absolute;top:-7px;right:-7px;min-width:20px;height:18px;padding:0 5px;border-radius:99px;background:var(--bl);color:#0b1a33;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);box-sizing:content-box;line-height:1}
 .kpi.rc{position:relative;cursor:pointer}.pop{display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:6;width:236px;background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:8px 12px;box-shadow:0 8px 24px #0006}.pop.on{display:block}
 .pr{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:3px 0}.pr.tt{border-top:1px solid var(--ln);margin-top:4px;padding-top:6px;font-weight:700}.pr .in{color:var(--ok)}.pr .bl{color:var(--bl)}
-.pop.l{left:0;right:auto}.kpi.cxk2{cursor:pointer;border-left:3px solid var(--bl)}.kpi.cxk2 b{color:var(--bl)}
+.pop.l{left:0;right:auto}.kpi.cxk2{cursor:pointer;border-left:3px solid var(--bl)}.kpi.dsk{border-left:3px solid var(--bad)}.kpi.rck{border-left:3px solid var(--ok)}
+.kpi.lim.neg .lm button.on{background:var(--bad);border-color:var(--bad);color:#2a0a0a}.kpi.lim.neg .lm button:not(.on){border-color:color-mix(in srgb,var(--bad) 45%,transparent);color:var(--bad)}
+.sec .tots .tot{background:var(--ln);border-top-color:var(--bg)}.sec .tots .tot+.tot{border-left-color:var(--bg)}
+.ctab{display:none}.ctab.on{display:block}.ctabs .ts{display:none}.cfx .row:last-of-type{border-bottom:0}.cfx .ift{margin:0 -12px -12px}.kpi.cxk2 b{color:var(--bl)}
 .pr .pu{color:var(--cc)}
 .pop{width:max-content;min-width:240px;max-width:calc(100vw - 28px)}.pr span{white-space:nowrap}.toast{z-index:60}
 .mw{position:relative}.mw input{padding-right:46px}.cb{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;background:transparent;color:var(--mut);display:flex;align-items:center;justify-content:center;padding:0;margin:0;border-radius:8px}
@@ -165,11 +168,11 @@ img.nu{object-fit:cover;display:block}.ic img.nu{width:24px;height:24px;border-r
 .iact{display:none;gap:6px}.ish{margin:-4px 2px 10px;font-size:12px}
 .itb{display:flex;align-items:center;gap:8px;margin:0 0 10px}.itb input{flex:1 1 88px;min-width:0;height:38px;padding:0 10px}.itb .sbt{height:38px;white-space:nowrap}
 .ihd{display:flex;align-items:center;gap:10px;padding:9px 12px;font-size:11.5px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--ln)}.ihd .c{flex:1}.ihd .r{text-align:right}.ihd .ac{display:none}
-#impx input[type=checkbox]{-webkit-appearance:none;appearance:none;width:18px;height:18px;flex:none;margin:0;padding:0;border:2px solid var(--mut);border-radius:3px;background:transparent;display:grid;place-content:center;cursor:pointer;transition:background .15s,border-color .15s}
-#impx input[type=checkbox]:checked,#impx input[type=checkbox]:indeterminate{background:var(--ac);border-color:var(--ac)}
-#impx input[type=checkbox]:checked::after{content:"";width:4px;height:9px;border:solid #06241b;border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
-#impx input[type=checkbox]:indeterminate::after{content:"";width:8px;height:2px;background:#06241b}
-#impx input[type=checkbox]:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+input[type=checkbox]{-webkit-appearance:none;appearance:none;width:18px;height:18px;flex:none;margin:0;padding:0;border:2px solid var(--mut);border-radius:3px;background:transparent;display:grid;place-content:center;cursor:pointer;transition:background .15s,border-color .15s}
+input[type=checkbox]:checked,input[type=checkbox]:indeterminate{background:var(--ac);border-color:var(--ac)}
+input[type=checkbox]:checked::after{content:"";width:4px;height:9px;border:solid #06241b;border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+input[type=checkbox]:indeterminate::after{content:"";width:8px;height:2px;background:#06241b}
+input[type=checkbox]:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
 .ift{display:flex;align-items:center;justify-content:flex-end;gap:6px 18px;padding:6px 8px 6px 12px;border-top:1px solid var(--ln);font-size:13px;color:var(--tx)}
 .ipp{display:flex;align-items:center;gap:6px;color:var(--mut)}.ipp .sel{position:relative;color:var(--tx)}
 .ipp select{-webkit-appearance:none;appearance:none;width:auto;border:0;background:transparent;color:var(--tx);font-weight:600;padding:4px 18px 4px 4px;cursor:pointer}
@@ -183,7 +186,7 @@ img.nu{object-fit:cover;display:block}.ic img.nu{width:24px;height:24px;border-r
 .sheet{scrollbar-width:thin;scrollbar-color:var(--ln) transparent;scrollbar-color:color-mix(in srgb,var(--mut) 45%,transparent) transparent}
 .sheet::-webkit-scrollbar{width:10px}.sheet::-webkit-scrollbar-track{background:transparent}
 .sheet::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--mut) 45%,transparent);border-radius:99px;border:3px solid var(--bg)}
-@media(max-width:899px){.lpd{display:none}.lpm{display:inline}.ift{justify-content:space-between;gap:6px 8px}.ipg button{width:30px}}
+@media(max-width:899px){.ctabs .tl{display:none}.ctabs .ts{display:inline}.lpd{display:none}.lpm{display:inline}.ift{justify-content:space-between;gap:6px 8px}.ipg button{width:30px}}
 @media(min-width:900px){
  .ish{display:none}.ifg{touch-action:auto;user-select:auto;-webkit-user-select:auto}
  .row.ir,.ihd{display:grid;grid-template-columns:18px 26px minmax(0,1fr) 130px 76px;gap:12px;align-items:center;padding:8px 14px}
@@ -195,6 +198,7 @@ img.nu{object-fit:cover;display:block}.ic img.nu{width:24px;height:24px;border-r
  .iact .lan{color:var(--ac)}.iact .ign{color:var(--bad)}.iact .vol{color:var(--bl)}
  .iact button[data-tip]:hover::after,.iact button[data-tip]:focus-visible::after{content:attr(data-tip);position:absolute;right:0;bottom:calc(100% + 6px);white-space:nowrap;background:var(--tx);color:var(--bg);font-size:12px;font-weight:600;padding:5px 9px;border-radius:8px;pointer-events:none;z-index:5;box-shadow:0 4px 14px #0005}
  .ibox,#impx .isw{overflow:visible}.ipp select{font-size:13px}
+ .sheet.sheet-cfg{max-width:760px}
  .row.ir .itg{display:inline;margin:0}.row.ir .itg::before{content:" · ";color:var(--mut);font-weight:400}
 }
 .sbt{flex:none;padding:8px 14px;border-radius:10px;border:1px solid var(--ac);background:var(--acs);color:var(--ac);font-weight:700;font-size:13px}.sbt:disabled{opacity:.6}
@@ -205,7 +209,7 @@ img.nu{object-fit:cover;display:block}.ic img.nu{width:24px;height:24px;border-r
  body::before{content:"";position:absolute;top:0;left:0;right:0;height:82px;background:var(--card);border-bottom:1px solid var(--ln)}
  .app{max-width:1680px;padding:14px 32px 40px;border:0!important;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:54px;align-content:start;column-gap:10px;row-gap:14px;align-items:center;z-index:1}
  .top{display:contents}.logo{grid-column:1;grid-row:1;justify-self:start}.top>div:last-child{grid-column:3;grid-row:1;justify-self:end}.top .ib{width:44px;height:44px}
- .nav{grid-column:1/-1;grid-row:1;justify-self:center;background:var(--bg);padding:4px;height:54px}.nav button{width:44px;height:44px;padding:0;border-radius:10px}.nav>div{flex:none;min-width:210px}.nav strong{display:inline;margin-right:8px}
+ .nav{grid-column:1/-1;grid-row:1;justify-self:center;background:var(--bg);padding:4px;height:54px}.nav button{width:44px;height:44px;padding:0;border-radius:10px}.nav>div{flex:none;min-width:210px}.nav strong{display:block;margin:0;line-height:1.25}
  .kpis{grid-column:1/-1;grid-row:2;margin-top:24px;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.kpi.lim{grid-column:span 2}.kpi.lim b{font-size:30px}
  .kpis .kpi:not(.lim){display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14px 16px}.kpis .kpi:not(.lim) b{font-size:22px}.kpi small{font-size:12.5px}.pop{text-align:left}
  .chips{grid-column:1;grid-row:3;margin:0}.chips button{flex:none;padding:0 16px;height:44px}
@@ -216,7 +220,7 @@ img.nu{object-fit:cover;display:block}.ic img.nu{width:24px;height:24px;border-r
  .colh{font-size:11.5px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--ln);padding-top:8px;padding-bottom:8px}
  .colh .r,.sec .row>b{text-align:right}.sec .row .n small{display:none}.sec .row:hover{background:var(--bg)}
  .tcol,.dcol{display:block}.tcol{font-size:12px;color:var(--mut)}.tcol.c{color:var(--cc)}.tcol.g{color:var(--ok);font-weight:600}.tcol.b{color:var(--bl);font-weight:600}.dcol{font-size:13px;color:var(--mut)}
- .tots{display:flex;background:var(--bg)}.tots .tot{flex:1 1 0;min-width:0}.tots .tot+.tot{border-top:0;border-left:1px solid var(--ln)}.tot{padding:12px 20px}
+ .tots{display:flex}.tots .tot{flex:1 1 0;min-width:0}.tots .tot+.tot{border-top:0;border-left:1px solid var(--ln)}.tot{padding:12px 20px}
  .ov{align-items:center}.sheet{border-radius:20px;max-width:480px;max-height:88vh;padding:20px 22px}.sheet.sheet-lg{max-width:1100px}
 }
 @media(min-width:900px){.app>.box,.app>.hint{grid-column:1/-1;grid-row:2;justify-self:center;width:100%;max-width:400px}}
@@ -285,8 +289,8 @@ function mes(key){if(key<INICIO){const A0=snaps[key]&&snaps[key].adj;return{adia
  return {adiant:AD0,liq:L0,adj:!!A,live,snap:sn,itens:[...it0,...xf]}}
 function shift(d){let[y,m]=k.split('-').map(Number);m+=d;if(m>12){m=1;y++}if(m<1){m=12;y--}const nk=y+'-'+String(m).padStart(2,'0');if(nk<'2026-01')return;k=nk;render()}
 function row(i,mode){const dt=mode==='cfg'?'dia '+i.dv:fmtD(i.data),rc=i.tipo==='r',tl=(rc?'Receita':i.cartao?'Cartão':'Pix/Débito')+(mode==='cfg'?'':i.auto?' · automática':i.fixo?' · fixo':' · avulso'),tc=rc?'g':i.cartao?'c':'';
- return `<div class="row ${rc?'rec':i.cartao?'cc':'dsp'}" onclick="${i.auto?"toast('Sobra calculada automaticamente')":"openItem('"+mode+"',"+i.id+")"}"><div class="ic">${rc?PLUS:i.cartao?CARD:MINUS}</div>
-<div class="n"><div>${i.nome}${i.parc?` <span class="pc">${i.parc.p}/${i.parc.n}</span>`:''}</div><small class="${tc}">${tl} · ${dt}</small></div>${mode==='mes'?`<span class="tcol ${tc}">${tl}</span><span class="dcol">${dt}</span>`:''}<b class="${rc?'in':''}">${rc?'+':'−'} ${R(i.valor)}</b></div>`}
+ return `<div class="row ${rc?'rec':i.cartao?'cc':'dsp'}" onclick="${i.auto?"toast('Sobra calculada automaticamente')":"openItem('"+mode+"',"+i.id+")"}"><div class="ic">${rc?ARU18:i.cartao?CARD:ARD18}</div>
+<div class="n"><div>${i.nome}${i.parc?` <span class="pc">${i.parc.p}/${i.parc.n}</span>`:''}</div><small class="${tc}">${tl} · ${dt}</small></div>${mode==='mes'?`<span class="tcol ${tc}">${tl}</span><span class="dcol">${dt}</span>`:''}<b class="${rc?'in':'dn'}">${rc?'+':'−'} ${R(i.valor)}</b></div>`}
 function render(){M=hide;try{draw()}finally{M=false}}
 function draw(){const m=mes(k),[y,mo]=k.split('-').map(Number);
  const sum=d=>m.itens.filter(i=>i.tipo!=='r'&&(!d||i.dia===d)&&vis(i)).reduce((a,i)=>a+i.valor,0),inc=d=>m.itens.filter(i=>i.tipo==='r'&&(!d||i.dia===d)&&(d==='d20'||!i.xf)&&vis(i)).reduce((a,i)=>a+i.valor,0),
@@ -303,21 +307,21 @@ function draw(){const m=mes(k),[y,mo]=k.split('-').map(Number);
  const ok=openKey(),ck=addM(ok,-1),lbm=x=>MN[+x.slice(5)-1];
  const sc=k===ok?(inv(ck).st==='fechada'?`<button class="sc" onclick="k='${ck}';render()">Fatura fechada de ${lbm(ck)} · vence ${fmtS(inv(ck).due)} ›</button>`:''):`<button class="sc" onclick="k='${ok}';render()">‹ Ir para a fatura aberta (${lbm(ok)})</button>`;
  const TB=`<div class="tb1"><input id="qs" type="search" placeholder="Buscar…" autocomplete="off" value="${qry.replace(/"/g,'&quot;')}" oninput="setQ(this.value)"><button class="tbp" onclick="addHere()" aria-label="Adicionar lançamento"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="tbl">Novo lançamento</span></button></div>`;
- const GT=[['c','Cartão',CARD],['d','Despesas · Pix/Débito',MINUS],['r','Receitas',PLUS],['x','Caixinha',SAFE]],gOf=i=>i.cxm?'x':i.tipo==='r'?'r':i.cartao?'c':'d';
+ const GT=[['c','Cartão',CARD],['d','Despesas · Pix/Débito',ARD18],['r','Receitas',ARU18],['x','Caixinha',SAFE]],gOf=i=>i.cxm?'x':i.tipo==='r'?'r':i.cartao?'c':'d';
  const sec=(d,t,sub)=>{const dd=d==='all'?undefined:d,all=listItems(m,d),
   gs=GT.map(([g,l,ic])=>{const its=all.filter(i=>gOf(i)===g);if(!its.length)return '';const o=!!gOpen[g],v=its.reduce((a,i)=>a+(g==='x'&&i.tipo!=='g'?-i.valor:i.valor),0);
-   return `<button class="gh" onclick="togG('${g}')" aria-expanded="${o}"><span class="chev${o?' o':''}">›</span><span class="gi k-${g}">${ic}</span><span class="gl">${l}<small>(${its.length})</small></span><span class="${g==='c'?'pu':g==='x'?'bl':g==='r'?'in':''}">${g==='r'?'+':g==='x'&&v<0?'+':'−'} ${R(Math.abs(v))}</span></button>${o?its.map(i=>i.cxm?cxRow(i):row(i,'mes')).join(''):''}`}).join('');
+   return `<button class="gh" onclick="togG('${g}')" aria-expanded="${o}"><span class="chev${o?' o':''}">›</span><span class="gi k-${g}">${ic}</span><span class="gl">${l}<small>(${its.length})</small></span><span class="${g==='c'?'pu':g==='x'?'bl':g==='r'?'in':'dn'}">${g==='r'?'+':g==='x'&&v<0?'+':'−'} ${R(Math.abs(v))}</span></button>${o?its.map(i=>i.cxm?cxRow(i):row(i,'mes')).join(''):''}`}).join('');
   return `<div class="sec"><div class="sh"><b>${t}</b><span class="adj" onclick="openAdj()">${sub}${m.adj?' · ajustado':''} ✎</span></div>
  ${gs?'<div class="colh"><span></span><span>Lançamento</span><span>Tipo</span><span>Data</span><span class="r">Valor</span></div>'+gs:'<div class="row emp" style="cursor:default;color:var(--mut)">'+(qry.trim()?'Nenhum lançamento encontrado':'Nada lançado')+'</div>'}
  <div class="tots"><div class="tot"><span><span class="dn">${ARD}</span>Saídas</span><span class="dn">− ${R(sum(dd))}</span></div>${inc(dd)?`<div class="tot"><span><span class="in">${ARU}</span>Entradas</span><span class="in">+ ${R(inc(dd))}</span></div>`:''}${all.some(i=>i.cxm)?`<div class="tot"><span><span class="bl">${SAFE}</span>Caixinha</span><span class="bl">${cxN(d)>=0?'− ':'+ '}${R(Math.abs(cxN(d)))}</span></div>`:''}</div></div>`};
  const body=flt==='d5'?sec('d5','5º dia útil','Salário '+R(m.liq)):flt==='d20'?sec('d20','Dia 20','Adiantamento '+R(m.adiant)):sec('all','Total geral','Salário + adiantamento '+R(m.liq+m.adiant));
- $('app').innerHTML=`<div class="top"><div class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="36" height="36"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16a883"/><stop offset="1" stop-color="#0a5c48"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><circle cx="256" cy="256" r="150" fill="#fff"/><circle cx="256" cy="256" r="118" fill="none" stroke="#8fe3c6" stroke-width="10"/><path d="M190 262L240 312L330 206" fill="none" stroke="#0f8b6d" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Meu Controle<br><b>Financeiro</b></span></div><div><button class="ib" onclick="toggleHide()" aria-label="Ocultar valores" title="Ocultar valores">${hide?EYE_OFF:EYE}</button> <button class="ib" onclick="toggleTheme()" aria-label="Tema" title="Tema">◐</button> <button class="ib sb" onclick="openImp()" aria-label="A validar" title="A validar">${INBOX}${impN()?'<span class="csel">'+impN()+'</span>':''}</button> <button class="ib" onclick="openCfg()" aria-label="Modelo mensal" title="Modelo mensal">⚙</button></div></div>
+ $('app').innerHTML=`<div class="top"><div class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="36" height="36"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#16a883"/><stop offset="1" stop-color="#0a5c48"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#g)"/><circle cx="256" cy="256" r="150" fill="#fff"/><circle cx="256" cy="256" r="118" fill="none" stroke="#8fe3c6" stroke-width="10"/><path d="M190 262L240 312L330 206" fill="none" stroke="#0f8b6d" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Meu Controle<br><b>Financeiro</b></span></div><div><button class="ib" onclick="toggleHide()" aria-label="Ocultar valores" title="Ocultar valores">${hide?EYE_OFF:EYE}</button> <button class="ib" onclick="toggleTheme()" aria-label="Tema" title="Tema">◐</button> <button class="ib sb" onclick="openImp()" aria-label="A validar" title="A validar">${INBOX}${impN()?'<span class="csel">'+impN()+'</span>':''}</button> <button class="ib" onclick="openCfg()" aria-label="Configurações gerais" title="Configurações gerais">⚙</button></div></div>
  <div class="nav"><button onclick="shift(-1)" ${k<='2026-01'?'disabled style="opacity:.3"':''}>‹</button><div onclick="openMonths()" style="cursor:pointer" aria-label="Escolher mês"><strong>${MN[mo-1]} ${y}</strong><span class="badge ${I.st}">${LB}</span></div><button onclick="shift(1)">›</button></div>
  <div class="chips">${[['d5','5º dia útil'],['d20','Dia 20'],['all','Total geral']].map(([v,l])=>`<button class="${flt===v?'on':''}" onclick="flt='${v}';render()">${l}</button>`).join('')}</div>
- <div class="kpis"><div class="kpi rc" onclick="togPop(event)"><small><span class="ar dn">${ARD}</span>Despesas ⓘ</small><b class="dn">${R(gas)}</b><div class="pop l" onclick="event.stopPropagation()">${flt==='d20'?'':`<div class="pr"><span>Fatura${sfx}</span><span class="pu">− ${R(fat)}</span></div>`}<div class="pr"><span>Despesas${sfx}</span><span>− ${R(avu)}</span></div><div class="pr tt"><span>Total</span><span>− ${R(gas)}</span></div></div></div><div class="kpi rc" onclick="togPop(event)"><small><span class="ar in">${ARU}</span>Receitas ⓘ</small><b class="in">${R(rec)}</b><div class="pop" onclick="event.stopPropagation()"><div class="pr"><span>Salário${sfx}</span><span>${R(base)}</span></div><div class="pr"><span>Receitas${sfx}</span><span class="in">+ ${R(ext-au-xfv)}</span></div>${au?`<div class="pr"><span>Sobra do mês anterior</span><span class="in">+ ${R(au)}</span></div>`:''}${xfv?`<div class="pr"><span>Sobra do 5º dia útil</span><span class="in">+ ${R(xfv)}</span></div>`:''}${cxm?`<div class="pr"><span>Caixinha</span><span class="bl">${cxm>0?'−':'+'} ${R(Math.abs(cxm))}</span></div>`:''}<div class="pr tt"><span>Total</span><span>${R(rec)}</span></div></div></div><div class="kpi cxk2" onclick="openCx()"><small><span class="ar bl">${SAFE14}</span>Caixinha</small><b>${R(cxTotal('9999-12'))}</b></div>
+ <div class="kpis"><div class="kpi rc dsk" onclick="togPop(event)"><small><span class="ar dn">${ARD}</span>Despesas ⓘ</small><b class="dn">${R(gas)}</b><div class="pop l" onclick="event.stopPropagation()">${flt==='d20'?'':`<div class="pr"><span>Fatura${sfx}</span><span class="pu">− ${R(fat)}</span></div>`}<div class="pr"><span>Despesas${sfx}</span><span class="dn">− ${R(avu)}</span></div><div class="pr tt"><span>Total</span><span class="dn">− ${R(gas)}</span></div></div></div><div class="kpi rc rck" onclick="togPop(event)"><small><span class="ar in">${ARU}</span>Receitas ⓘ</small><b class="in">${R(rec)}</b><div class="pop" onclick="event.stopPropagation()"><div class="pr"><span>Salário${sfx}</span><span>${R(base)}</span></div><div class="pr"><span>Receitas${sfx}</span><span class="in">+ ${R(ext-au-xfv)}</span></div>${au?`<div class="pr"><span>Sobra do mês anterior</span><span class="in">+ ${R(au)}</span></div>`:''}${xfv?`<div class="pr"><span>Sobra do 5º dia útil</span><span class="in">+ ${R(xfv)}</span></div>`:''}${cxm?`<div class="pr"><span>Caixinha</span><span class="bl">${cxm>0?'−':'+'} ${R(Math.abs(cxm))}</span></div>`:''}<div class="pr tt"><span>Total</span><span>${R(rec)}</span></div></div></div><div class="kpi cxk2" onclick="openCx()"><small><span class="ar bl">${SAFE14}</span>Caixinha</small><b>${R(cxTotal('9999-12'))}</b></div>
  <div class="kpi lim ${LV<0?'neg':''}"><div class="lm"><button class="${lm?'':'on'}" onclick="setLm(0,event)">Geral</button><button class="${lm?'on':''}" onclick="setLm(1,event)">Proporcional</button></div><small>${LL}</small><b>${R(Math.abs(LV))}</b><div class="bar"><i style="width:${LP}%"></i></div></div></div>
  ${TB}${body}
- <div class="leg"><div class="lg"><span>${CARD} Cartão</span><span><span class="dn li">${MINUS}</span> Pix/Débito</span><span><span class="in li">${PLUS}</span> Receita</span><span><span class="bl li">${SAFE14}</span> Caixinha</span></div></div>`;
+ <div class="leg"><div class="lg"><span>${CARD} Cartão</span><span><span class="dn li">${ARD}</span> Pix/Débito</span><span><span class="in li">${ARU}</span> Receita</span><span><span class="bl li">${SAFE14}</span> Caixinha</span></div></div>`;
  const c=$('car');if(c){c.onpointerdown=carDown;const t=$('trk');t.style.transition='none';t.style.transform='translateX('+(-pg*100)+'%)';fit();requestAnimationFrame(()=>{t.style.transition='';fit()})}}
 function fit(){const c=$('car'),t=$('trk');if(c&&t&&t.children[pg])c.style.height=t.children[pg].offsetHeight+'px'}
 window.onresize=fit;
@@ -362,6 +366,7 @@ const SAFE14=SAFE.replace('width="20" height="20"','width="14" height="14"');
 const ico=d=>`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="${d}"/></svg>`,PLUS=ico('M12 5v14M5 12h14'),MINUS=ico('M5 12h14');
 const ARD='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>',
  ARU='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>';
+const ARD18=ARD.replace('width="14" height="14"','width="18" height="18"'),ARU18=ARU.replace('width="14" height="14"','width="18" height="18"');
 const kfmt=n=>n>=1e6?(n/1e6).toFixed(1).replace('.',',')+' mi':n>=1000?(n/1000).toFixed(1).replace('.',',')+' mil':String(Math.round(n));
 function cxBadge(){const t=cxTotal('9999-12');return t>0?'<span class="csel">'+(M?'•••':kfmt(t))+'</span>':''}
 function togPop(e){e.stopPropagation();const p=e.currentTarget.querySelector('.pop');if(!p)return;const on=p.classList.contains('on');document.querySelectorAll('.pop.on').forEach(x=>x.classList.remove('on'));if(!on)p.classList.add('on')}
@@ -472,7 +477,7 @@ function impSug(t){const tx=(t.descricao+' '+(t.comercio||'')).toLowerCase(),car
  if(card)return sai?{tp:'c'}:{tp:'ign',why:'pagamento ou estorno do cartão'};
  if(sai){if(/fatura/.test(tx))return {tp:'pf'};if(/caixinha|rdb|aplica/.test(tx))return {tp:'xg'};return {tp:'d'}}
  if(/caixinha|rdb|resgate/.test(tx))return {tp:'xr'};
- const nm=norm(cfg.nomeSalario||'').trim();if(nm&&norm(tx+' '+(t.pagador||'')).includes(nm))return {tp:'ign',why:'salário/adiantamento — já está no modelo mensal'};
+ const nm=norm(cfg.nomeSalario||'').trim();if(nm&&norm(tx+' '+(t.pagador||'')).includes(nm))return {tp:'sal',...impSalAlvo(t.data)};
  const ad=adOf(cfg),lq=cfg.base-ad-cfg.outros;if([lq,ad].some(v=>v>0&&Math.abs(v-t.valor)<1))return {tp:'ign',why:'parece ser o salário, que já está no modelo mensal'};
  return {tp:'r'}}
 /* procura lançamento já existente com o mesmo valor em data próxima (ou fixo do mesmo mês) */
@@ -480,14 +485,22 @@ function impDup(t){const d0=new Date(t.data),perto=d=>d&&Math.abs(new Date(d)-d0
  for(const kk in extras)for(const i of extras[kk])if(ig(i.valor)&&perto(i.data))return {nome:i.nome,data:i.data};
  for(const x of cx)if(x.tipo!=='i'&&ig(x.valor)&&perto(x.data))return {nome:x.nome||'Caixinha',data:x.data};
  const key=t.data.slice(0,7),sn=snaps[key]||{fixos:cfg.fixos};for(const f of sn.fixos||[])if(ig(f.valor))return {nome:f.nome,data:dateOf(key,f.dv)};return null}
+/* salário x adiantamento: o que estiver mais perto da data (5º dia útil do mês, dia 20 do mês ou 5º dia útil do mês seguinte) */
+function impSalAlvo(d){const K=d.slice(0,7),N=addM(K,1),ms=x=>new Date(x+'T12:00').getTime(),t0=ms(d);
+ return [['liq',K,quintoUtil(K)],['adiant',K,K+'-20'],['liq',N,quintoUtil(N)]].map(([campo,key,dt])=>({campo,key,dist:Math.abs(ms(dt)-t0)})).sort((a,b)=>a.dist-b.dist)[0]}
+const impSalNome=c=>c==='liq'?'salário':'adiantamento';
+function impSalAtualizar(id){const t=imp.find(x=>x.id===id);if(!t)return;const s=impSug(t);if(s.tp!=='sal')return;const m=mes(s.key),v=+t.valor,sg=snaps[s.key]||(snaps[s.key]={});
+ sg.adj={liq:s.campo==='liq'?v:m.liq,adiant:s.campo==='adiant'?v:m.adiant};markS(s.key);if(typeof flush==='function')flush();
+ impDec(id,'aprovado',null);toast((s.campo==='liq'?'Salário':'Adiantamento')+' de '+lbl(s.key)+' atualizado para '+R(v))}
 const impDia=d=>+d.slice(8,10)>=20?'d20':'d5';
 /* cartão: usa a data como veio do banco (para parcelas, a Pluggy já manda a data da própria parcela) */
 function impDataCartao(t){return t.data}
 function quando(iso){const h=(Date.now()-new Date(iso))/36e5;if(h<1)return 'há poucos minutos';if(h<24)return 'há '+Math.floor(h)+' h';const d=new Date(iso);return 'em '+pad(d.getDate())+'/'+pad(d.getMonth()+1)+' às '+pad(d.getHours())+':'+pad(d.getMinutes())}
-function impRow(t){const s=impSug(t),card=t.conta_tipo==='CREDIT',ent=t.movimento==='entrada',pf=s.tp==='pf',dup=pf?null:impDup(t),id=esc(t.id),
- vis=s.tp==='xg'||s.tp==='xr'?['cxr',SAFE]:card||pf?['cc',CARD]:ent?['rec',PLUS]:['dsp',MINUS],base=s.tp==='ign'?(card?'c':ent?'r':'d'):s.tp,
- LB={c:'Lançar como cartão',d:'Lançar como despesa',r:'Lançar como receita',xg:'Lançar como caixinha (guardar)',xr:'Lançar como caixinha (resgatar)',pf:'Registrar pagamento da fatura'},fk=pf?impFatKey(t.data):'',
- tags=(s.tp==='ign'?`<span class="itg">Sugestão: ignorar · ${s.why}</span>`:'')+(pf?`<span class="itg" style="color:var(--cc)">Fatura de ${lbl(fk)} · total ${R(fatTot(fk))}</span>`:'')+(dup?`<span class="itg">Já lançado? Parecido com ${esc(dup.nome)} · ${fmtS(dup.data)}</span>`:''),
+function impRow(t){const s=impSug(t),card=t.conta_tipo==='CREDIT',ent=t.movimento==='entrada',pf=s.tp==='pf',sal=s.tp==='sal',dup=pf||sal?null:impDup(t),id=esc(t.id),
+ vis=s.tp==='xg'||s.tp==='xr'?['cxr',SAFE]:card||pf?['cc',CARD]:ent?['rec',ARU18]:['dsp',ARD18],base=s.tp==='ign'?(card?'c':ent?'r':'d'):s.tp,
+ salAt=sal?(()=>{try{return mes(s.key)[s.campo]}catch(e){return 0}})():0,
+ LB={c:'Lançar como cartão',d:'Lançar como despesa',r:'Lançar como receita',xg:'Lançar como caixinha (guardar)',xr:'Lançar como caixinha (resgatar)',pf:'Registrar pagamento da fatura',sal:sal?'Atualizar '+impSalNome(s.campo):''},fk=pf?impFatKey(t.data):'',
+ tags=(sal?`<span class="itg" style="color:var(--ok)">Sugestão: atualizar o ${impSalNome(s.campo)} de ${lbl(s.key)} · hoje ${R(salAt)}</span>`:'')+(s.tp==='ign'?`<span class="itg">Sugestão: ignorar · ${s.why}</span>`:'')+(pf?`<span class="itg" style="color:var(--cc)">Fatura de ${lbl(fk)} · total ${R(fatTot(fk))}</span>`:'')+(dup?`<span class="itg">Já lançado? Parecido com ${esc(dup.nome)} · ${fmtS(dup.data)}</span>`:''),
  B=(c,tip,fn,ic)=>`<button class="${c}" data-tip="${tip}" aria-label="${tip}" onclick="${fn}">${ic}</button>`,
  /* mesma regra em todas as linhas: lançar à esquerda, ignorar à direita */
  act=impAba!=='pendente'?B('vol','Voltar para pendentes',`impDec('${id}','pendente')`,I_VOL)
@@ -495,7 +508,7 @@ function impRow(t){const s=impSug(t),card=t.conta_tipo==='CREDIT',ent=t.moviment
  /* arrastar: para a direita = botão da esquerda; para a esquerda = botão da direita */
  sw=impAba!=='pendente'?[['pen','Voltar para pendentes'],['pen','Voltar para pendentes']]
   :[['lan',LB[base]],['ign','Ignorar']];
- return `<div class="isw" data-id="${id}" data-r="${sw[0][0]}" data-l="${sw[1][0]}"><div class="ibg r ${sw[0][0]}">${sw[0][1]} →</div><div class="ibg l ${sw[1][0]}">← ${sw[1][1]}</div><div class="row ${vis[0]} ir ifg"><input type="checkbox" class="isel" aria-label="Selecionar" ${impSel.has(t.id)?'checked':''} onchange="impTog('${id}',this.checked)"><div class="ic">${vis[1]}</div><div class="n"><div>${esc(t.descricao)}</div><small>${card?'Cartão':'Conta'} · ${fmtD(t.data)}${t.parcela&&t.total_parcelas?' · parcela '+t.parcela+'/'+t.total_parcelas:''}</small>${tags}</div><b class="${ent?'in':''}">${ent?'+':'−'} ${R(+t.valor)}</b><div class="iact">${act}</div></div></div>`}
+ return `<div class="isw" data-id="${id}" data-r="${sw[0][0]}" data-l="${sw[1][0]}"><div class="ibg r ${sw[0][0]}">${sw[0][1]} →</div><div class="ibg l ${sw[1][0]}">← ${sw[1][1]}</div><div class="row ${vis[0]} ir ifg"><input type="checkbox" class="isel" aria-label="Selecionar" ${impSel.has(t.id)?'checked':''} onchange="impTog('${id}',this.checked)"><div class="ic">${vis[1]}</div><div class="n"><div>${esc(t.descricao)}</div><small>${card?'Cartão':'Conta'} · ${fmtD(t.data)}${t.parcela&&t.total_parcelas?' · parcela '+t.parcela+'/'+t.total_parcelas:''}</small>${tags}</div><b class="${ent?'in':'dn'}">${ent?'+':'−'} ${R(+t.valor)}</b><div class="iact">${act}</div></div></div>`}
 function impDraw(soAberto){if(soAberto&&!$('impx'))return;const sh=document.querySelector('#impx .sheet'),top=sh?sh.scrollTop:0;
  const L=imp.filter(t=>t.status===impAba);const ni=imp.filter(t=>t.status==='ignorado').length,ult=impCx.map(c=>c.ultima_sinc).filter(Boolean).sort().pop();
  const con=impCx.length?`<div class="sum" style="border:0;margin:0;padding:0;align-items:center;gap:10px"><span>Conectado: <b>${esc(impCx.map(c=>c.conector||'Open Finance').join(', '))}</b><small class="sub2">${ult?'Atualizado '+quando(ult):'Ainda não atualizado'}</small></span><button class="sbt" onclick="impSync()" ${impBusy?'disabled':''}>${impBusy?'Atualizando…':'Atualizar'}</button></div>`
@@ -512,8 +525,9 @@ function impDraw(soAberto){if(soAberto&&!$('impx'))return;const sh=document.quer
 /* filtro da pesquisa (descrição, comércio, pagador, data, valor, parcela) */
 function impFil(){const L=imp.filter(t=>t.status===impAba),q=norm(impQ.trim());if(!q)return L;
  return L.filter(t=>norm([t.descricao,t.comercio,t.pagador,fmtD(t.data),fm(+t.valor),t.parcela&&t.total_parcelas?t.parcela+'/'+t.total_parcelas:''].join(' ')).includes(q))}
-const impPgr=np=>[[1,'Primeira página',impPg<=1],[impPg-1,'Página anterior',impPg<=1],[impPg+1,'Próxima página',impPg>=np],[np,'Última página',impPg>=np]]
- .map(([n,t,d],i)=>`<button onclick="impIr(${n})" ${d?'disabled':''} aria-label="${t}" title="${t}">${I_PG[i]}</button>`).join('');
+const pgBtns=(pg,np,fn)=>[[1,'Primeira página',pg<=1],[pg-1,'Página anterior',pg<=1],[pg+1,'Próxima página',pg>=np],[np,'Última página',pg>=np]]
+ .map(([n,t,d],i)=>`<button onclick="${fn}(${n})" ${d?'disabled':''} aria-label="${t}" title="${t}">${I_PG[i]}</button>`).join(''),
+ impPgr=np=>pgBtns(impPg,np,'impIr');
 function impList(){const el=$('impL');if(!el)return;const F=impFil(),np=Math.max(1,Math.ceil(F.length/impPP));impPg=Math.min(Math.max(1,impPg),np);
  impSel.forEach(id=>{if(!F.some(t=>t.id===id))impSel.delete(id)});
  const a=(impPg-1)*impPP,P=F.slice(a,a+impPP),q=impQ.trim(),
@@ -556,6 +570,7 @@ function impDec(id,st,lid){const t=imp.find(x=>x.id===id);if(t)t.status=st;impDr
 function impLancar(id){const t=imp.find(x=>x.id===id);if(!t)return;const s=impSug(t),card=t.conta_tipo==='CREDIT',ent=t.movimento==='entrada',tp=s.tp==='ign'?(card?'c':ent?'r':'d'):s.tp,
  nome=String(t.descricao||'').replace(/[<>"'`]/g,'').trim().slice(0,80)+(t.parcela&&t.total_parcelas?' '+t.parcela+'/'+t.total_parcelas:'');
  if(tp==='pf')return openPagFat(id);
+ if(tp==='sal')return impSalAtualizar(id);
  if(tp==='xg'||tp==='xr'){openCxMov(tp==='xg'?'g':'r');ctxC.imp=id;$('x_v').value=fm(t.valor);$('x_d').value=t.data;$('x_n').value=nome;$('x_dia').value=impDia(t.data);return}
  const data=tp==='c'?impDataCartao(t):t.data;
  openItem('mes',0,tp==='c'?'d5':impDia(data),{valor:+t.valor,cartao:tp==='c',data,tipo:tp==='r'?'r':undefined});ctx.imp=id;$('i_n').value=nome;upd()}
@@ -585,21 +600,34 @@ async function impSync(auto){if(impBusy)return;impBusy=true;impMsg='';impDraw(tr
  finally{impBusy=false;impDraw(true);render()}}
 function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2600)}
 /* ---- Modelo mensal ---- */
-function openCfg(){draft=JSON.parse(JSON.stringify(cfg));drawCfg()}
-function drawCfg(){const d=draft,ad=adOf(d);$('m1').innerHTML=`<div class="ov" onclick="if(event.target===this)closeCfg()"><div class="sheet"><h3>Modelo mensal <button class="ib" onclick="closeCfg()">✕</button></h3>
-<div class="box"><h4>Salário</h4><label>Salário base</label><input id="s_base" ${MY} value="${fm(d.base)}" oninput="mk(this);sal()">
+function openCfg(){draft=JSON.parse(JSON.stringify(cfg));cfgTab='mod';cfgPg=1;drawCfg()}
+let cfgTab='mod',cfgPg=1,cfgPP=(()=>{try{const v=+localStorage.getItem('prumo_fx_pp');return IMP_PPS.includes(v)?v:5}catch(e){return 5}})();
+const CFG_T=[['mod','Modelo mensal','Modelo'],['fix','Valores fixos','Fixos'],['car','Cartão de crédito','Cartão'],['ger','Conta e segurança','Conta']];
+function cfgAba(t){cfgTab=t;document.querySelectorAll('.ctabs button,.ctab').forEach(x=>x.classList.toggle('on',x.dataset.t===t))}
+function drawCfg(){const d=draft,ad=adOf(d),on=t=>cfgTab===t?' on':'';$('m1').innerHTML=`<div class="ov" onclick="if(event.target===this)closeCfg()"><div class="sheet sheet-cfg"><h3>Configurações gerais <button class="ib" onclick="closeCfg()" aria-label="Fechar">✕</button></h3>
+<div class="seg ctabs">${CFG_T.map(([v,l,c])=>`<button class="${on(v)}" data-t="${v}" onclick="cfgAba('${v}')"><span class="tl">${l}</span><span class="ts">${c}</span></button>`).join('')}</div>
+<div class="ctab${on('mod')}" data-t="mod"><div class="box"><h4>Salário</h4><label>Salário base</label><input id="s_base" ${MY} value="${fm(d.base)}" oninput="mk(this);sal()">
 <div class="g2"><div><label>Adiantamento (dia 20) %</label><input id="s_pct" ${DG} value="${d.pct}" oninput="dg(this,3);sal()"></div><div><label>Adiantamento R$</label><input id="s_ad" disabled value="${fm(ad)}"></div></div>
 <div class="g2"><div><label>Outros descontos</label><input id="s_out" ${MY} value="${fm(d.outros)}" oninput="mk(this);sal()"></div><div><label>Líquido 5º dia útil</label><input id="s_liq" ${MY} value="${fm(Math.max(0,d.base-ad-d.outros))}" oninput="mk(this);sal('liq')"></div></div>
 <div class="sum"><span>Total de descontos</span><b id="s_tot">${R(ad+d.outros)}</b></div>
 <div class="hint">Editar "Outros descontos" recalcula o líquido, e vice-versa. O adiantamento já entra no total de descontos.</div>
-<label>Nome de quem paga o salário (Open Finance)</label><input id="s_nome" value="${esc(d.nomeSalario||'')}" placeholder="Como aparece no extrato" autocomplete="off">
-<div class="hint">Transferências recebidas desse nome aparecem em "A validar" com sugestão de ignorar, pois salário e adiantamento já estão no modelo.</div></div>
-<div class="box"><h4>Valores fixos (despesas e receitas)</h4>${d.fixos.map(i=>row(i,'cfg')).join('')}<button class="add" onclick="openItem('cfg',0,'d5')">+ Novo valor fixo</button></div>
-<div class="box"><h4>Cartão de crédito</h4><div class="g2"><div><label>Dia de fechamento</label><input id="c_f" ${DG} value="${d.cartao.fech}" oninput="dg(this,2)"></div><div><label>Dia de vencimento</label><input id="c_v" ${DG} value="${d.cartao.venc}" oninput="dg(this,2)"></div></div>
-<label>Limite</label><input id="c_l" ${MY} value="${fm(d.cartao.limite)}" oninput="mk(this)"></div>
-<label class="chk" style="color:var(--tx);font-size:14px;margin:0 0 12px"><input id="c_ap" type="checkbox" ${(d._ap===undefined?startedMonths().some(emptyM):d._ap)?'checked':''}><span>Ao salvar, escolher meses já iniciados para refazer com este modelo</span></label>
+<label style="font-size:13px;color:var(--tx);margin:18px 0 6px">Nome de quem paga o salário (Open Finance)</label><input id="s_nome" value="${esc(d.nomeSalario||'')}" placeholder="Como aparece no extrato" autocomplete="off">
+<div class="hint">Transferências recebidas desse nome aparecem em "A validar" com sugestão de atualizar o salário (se a data estiver mais perto do 5º dia útil) ou o adiantamento (se estiver mais perto do dia 20) daquele mês. Ignorar não muda nada.</div></div></div>
+<div class="ctab${on('fix')}" data-t="fix"><div class="box cfx"><h4>Valores fixos (despesas e receitas)</h4><button class="add" onclick="openItem('cfg',0,'d5')">+ Novo valor fixo</button><div id="cfg_fx"></div></div></div>
+<div class="ctab${on('car')}" data-t="car"><div class="box"><h4>Cartão de crédito</h4><div class="g2"><div><label>Dia de fechamento</label><input id="c_f" ${DG} value="${d.cartao.fech}" oninput="dg(this,2)"></div><div><label>Dia de vencimento</label><input id="c_v" ${DG} value="${d.cartao.venc}" oninput="dg(this,2)"></div></div>
+<label>Limite</label><input id="c_l" ${MY} value="${fm(d.cartao.limite)}" oninput="mk(this)"></div></div>
+<div class="ctab${on('ger')}" data-t="ger">
 <div class="box"><h4>Face ID neste aparelho</h4><div class="hint" style="margin:0 0 10px">${bioOn()?'Ativado: ao abrir o site, toque em "Desbloquear com Face ID" para entrar.':'Pede o Face ID (ou a biometria do aparelho) ao abrir o site. Vale só para este aparelho.'}</div><button class="sbt" onclick="bioToggle()">${bioOn()?'Desativar Face ID':'Ativar Face ID'}</button></div>
-<button class="pri" onclick="saveCfg()">Salvar</button><button class="dan" style="border-color:var(--ln);color:var(--mut)" onclick="sair()">Sair da conta</button><button class="dan" onclick="askReset()">Zerar o sistema…</button></div></div>`}
+<div class="box"><h4>Sessão e dados</h4><button class="dan" style="border-color:var(--ln);color:var(--mut);margin-top:0" onclick="sair()">Sair da conta</button><button class="dan" onclick="askReset()">Zerar o sistema…</button></div></div>
+<label class="chk" style="color:var(--tx);font-size:14px;margin:4px 2px 0"><input id="c_ap" type="checkbox" ${(d._ap===undefined?startedMonths().some(emptyM):d._ap)?'checked':''}><span>Ao salvar, escolher meses já iniciados para refazer com este modelo</span></label>
+<button class="pri" onclick="saveCfg()">Salvar</button></div></div>`;cfgFx()}
+/* Valores fixos: paginação igual à da tela "A validar" */
+function cfgFx(){const el=$('cfg_fx');if(!el||!draft)return;const L=draft.fixos,np=Math.max(1,Math.ceil(L.length/cfgPP));cfgPg=Math.min(Math.max(1,cfgPg),np);
+ const a=(cfgPg-1)*cfgPP,P=L.slice(a,a+cfgPP);
+ el.innerHTML=L.length?P.map(i=>row(i,'cfg')).join('')+`<div class="ift"><label class="ipp"><span class="lpd">Linhas por página:</span><span class="lpm">Por página:</span><span class="sel"><select aria-label="Linhas por página" onchange="cfgSetPP(this.value)">${IMP_PPS.map(n=>`<option value="${n}" ${n===cfgPP?'selected':''}>${n}</option>`).join('')}</select></span></label><span>${a+1}–${a+P.length} de ${L.length}</span><span class="ipg">${pgBtns(cfgPg,np,'cfgIr')}</span></div>`
+  :'<div class="hint" style="margin:4px 0 0">Nenhum valor fixo ainda.</div>'}
+function cfgIr(n){cfgPg=n;cfgFx()}
+function cfgSetPP(v){cfgPP=+v;try{localStorage.setItem('prumo_fx_pp',String(cfgPP))}catch(e){}cfgPg=1;cfgFx()}
 function sal(f){const b=pn($('s_base')),ad=b*pi($('s_pct'))/100;
  if(f==='liq'){$('s_out').value=fm(Math.max(0,b-ad-pn($('s_liq'))))}else{$('s_liq').value=fm(Math.max(0,b-ad-pn($('s_out'))))}
  $('s_ad').value=fm(ad);$('s_tot').textContent=R(ad+pn($('s_out')))}
@@ -743,7 +771,7 @@ async function doLogin(){const e=$('lg_e').value.trim(),s=$('lg').value;if(!e||!
  catch(x){login(/invalid/i.test(x.message||'')?'E-mail ou senha incorretos.':'Não foi possível entrar: '+(x.message||x));$('lg_e').value=e}}
 async function sair(){try{await SB().auth.signOut()}catch(e){}location.reload()}
 function load(){$('app').innerHTML='<div class="hint" style="text-align:center;margin-top:30vh">Carregando…</div>';
- google.script.run.withSuccessHandler(d=>{cfg=Object.assign(defCfg(),d.cfg||{});if(!cfg.pagReal){cfg.pagReal=today;dirty.cfg=true}snaps=d.snaps||{};extras=d.extras||{};cx=d.cx||[];k=openKey();mes(k);flush();render();hideSplash();impLoad().then(()=>{if($('app').querySelector('.kpis'))render()})})
+ google.script.run.withSuccessHandler(d=>{cfg=Object.assign(defCfg(),d.cfg||{});if(!cfg.pagReal){cfg.pagReal=today;dirty.cfg=true}snaps=d.snaps||{};extras=d.extras||{};cx=d.cx||[];mes(openKey());k=today.slice(0,7);flt=+today.slice(8,10)>=20?'d20':'d5';mes(k);flush();render();hideSplash();impLoad().then(()=>{if($('app').querySelector('.kpis'))render()})})
  .withFailureHandler(e=>{if(String(e.message).includes('UNAUTHORIZED'))return login()
   hideSplash();$('app').innerHTML=`<div class="box" style="margin-top:18vh"><h4>Não foi possível carregar</h4><div class="hint">${e.message}</div><button class="pri" onclick="load()">Tentar de novo</button></div>`}).getAll()}
 function start(){if(/SEU-PROJETO|SUA-CHAVE/.test(SB_URL+SB_KEY)){hideSplash();$('app').innerHTML='<div class="box" style="margin-top:18vh"><h4>Falta configurar</h4><div class="hint">Edite as constantes SB_URL e SB_KEY no index.html com a URL e a chave anon do projeto no Supabase.</div></div>';return}
